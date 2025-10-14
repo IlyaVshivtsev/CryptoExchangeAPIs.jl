@@ -1,9 +1,5 @@
 module V2
 
-include("Symbol.jl")
-using .Symbol
-
-include("Symbols.jl")
-using .Symbols
+include("Symbols/Symbols.jl")
 
 end

@@ -31,9 +31,9 @@ Base.@kwdef struct GetInstrumentsQuery <: DeribitPublicQuery
     kind::Maybe{InstrumentKind.T} = nothing
 end
 
-@enum FutureType linear reversed
+@enumx FutureType linear reversed
 
-@enum OptionType put call
+@enumx OptionType put call
 
 struct GetInstrumentsData <: DeribitData
     instrument_name::Maybe{String}
@@ -46,7 +46,7 @@ struct GetInstrumentsData <: DeribitData
     counter_currency::Maybe{String}
     creation_timestamp::NanoDate
     expiration_timestamp::NanoDate
-    future_type::Maybe{FutureType}
+    future_type::Maybe{FutureType.T}
     instrument_id::Int64
     instrument_type::Maybe{String}
     is_active::Bool
@@ -55,7 +55,7 @@ struct GetInstrumentsData <: DeribitData
     max_leverage::Maybe{Float64}
     max_liquidation_commission::Maybe{Float64}
     min_trade_amount::Maybe{Float64}
-    option_type::Maybe{OptionType}
+    option_type::Maybe{OptionType.T}
     price_index::Maybe{String}
     rfq::Maybe{Bool}
     settlement_currency::Maybe{String}
@@ -66,7 +66,7 @@ struct GetInstrumentsData <: DeribitData
 end
 
 """
-    get_instruments(client::DeribitClient, query::InstrumentQuery)
+    get_instruments(client::DeribitClient, query::GetInstrumentsQuery)
     get_instruments(client::DeribitClient = Deribit.DeribitClient(Deribit.public_config); kw...)
 
 Retrieves available trading instruments. This method can be used to see which instruments are available for trading, or which instruments have recently expired.

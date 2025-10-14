@@ -9,6 +9,7 @@ export HuobiCommonQuery,
     HuobiData
 
 using Serde
+using EnumX
 using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
@@ -25,7 +26,7 @@ abstract type HuobiPublicQuery  <: HuobiCommonQuery end
 abstract type HuobiAccessQuery  <: HuobiCommonQuery end
 abstract type HuobiPrivateQuery <: HuobiCommonQuery end
 
-@enum Status begin
+@enumx Status begin
     ok
     error
 end
@@ -43,7 +44,7 @@ end
 - `code::Int64`: Response code.
 """
 struct Data{D} <: AbstractAPIsData
-    status::Maybe{Status}
+    status::Maybe{Status.T}
     ch::Maybe{String}
     ts::Maybe{NanoDate}
     code::Maybe{Int64}
@@ -60,7 +61,7 @@ end
 - `ts::NanoDate`: The UTC timestamp when API respond.
 """
 struct DataTick{D} <: AbstractAPIsData
-    status::Status
+    status::Status.T
     ch::String
     ts::NanoDate
     tick::D
@@ -211,5 +212,6 @@ include("Errors.jl")
 
 include("Market/Market.jl")
 include("V1/V1.jl")
+include("V2/V2.jl")
 
 end

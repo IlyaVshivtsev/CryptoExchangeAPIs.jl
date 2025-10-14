@@ -131,6 +131,7 @@ struct OkexAPIError{T} <: AbstractAPIsError
     data::Maybe{Vector{Any}}
 
     function OkexAPIError(code::Int64, x...)
+        iszero(code) && throw(ArgumentError("code must be nonzero"))
         return new{code}(code, x...)
     end
 end

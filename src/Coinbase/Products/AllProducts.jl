@@ -1,8 +1,8 @@
-module AllTradingPairs
+module AllProducts
 
-export AllTradingPairsQuery,
-    AllTradingPairsData,
-    all_trading_pairs
+export AllProductsQuery,
+    AllProductsData,
+    all_products
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -10,11 +10,11 @@ using Dates, NanoDates, TimeZones
 using CryptoExchangeAPIs.Coinbase
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef struct AllTradingPairsQuery <: CoinbasePublicQuery
+Base.@kwdef struct AllProductsQuery <: CoinbasePublicQuery
     type::Maybe{String} = nothing
 end
 
-struct AllTradingPairsData <: CoinbaseData
+struct AllProductsData <: CoinbaseData
     id::String
     base_currency::Maybe{String}
     quote_currency::Maybe{String}
@@ -35,13 +35,13 @@ struct AllTradingPairsData <: CoinbaseData
     high_bid_limit_percentage::Maybe{Float64}
 end
 
-function Serde.isempty(::Type{<:AllTradingPairsData}, x)::Bool
+function Serde.isempty(::Type{<:AllProductsData}, x)::Bool
     return x === ""
 end
 
 """
-    all_trading_pairs(client::CoinbaseClient, query::AllTradingPairsQuery)
-    all_trading_pairs(client::CoinbaseClient = Coinbase.CoinbaseClient(Coinbase.public_config); kw...)
+    all_products(client::CoinbaseClient, query::AllProductsQuery)
+    all_products(client::CoinbaseClient = Coinbase.CoinbaseClient(Coinbase.public_config); kw...)
 
 Gets a list of available currency pairs for trading.
 
@@ -58,20 +58,20 @@ Gets a list of available currency pairs for trading.
 ```julia
 using CryptoExchangeAPIs.Coinbase
 
-result = Coinbase.Products.all_trading_pairs(;
+result = Coinbase.Products.all_products(;
     type = "ADA-USDT",
 )
 ```
 """
-function all_trading_pairs(client::CoinbaseClient, query::AllTradingPairsQuery)
-    return APIsRequest{Vector{AllTradingPairsData}}("GET", "products", query)(client)
+function all_products(client::CoinbaseClient, query::AllProductsQuery)
+    return APIsRequest{Vector{AllProductsData}}("GET", "products", query)(client)
 end
 
-function all_trading_pairs(
+function all_products(
     client::CoinbaseClient = Coinbase.CoinbaseClient(Coinbase.public_config);
     kw...,
 )
-    return all_trading_pairs(client, AllTradingPairsQuery(; kw...))
+    return all_products(client, AllProductsQuery(; kw...))
 end
 
 end

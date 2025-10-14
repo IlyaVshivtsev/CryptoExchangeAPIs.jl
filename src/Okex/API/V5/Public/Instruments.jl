@@ -29,8 +29,8 @@ end
 
 struct InstrumentsData <: OkexData
     instId::String
-    baseCcy::String
-    quoteCcy::String
+    baseCcy::Maybe{String}
+    quoteCcy::Maybe{String}
     ctMult::Maybe{String}
     ctType::Maybe{String}
     ctVal::Maybe{Float64}

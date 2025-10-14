@@ -1,9 +1,14 @@
 module V1
 
-include("MarketAll.jl")
-using .MarketAll
+include("Market/Market.jl")
 
-include("CandlesDays.jl")
-using .CandlesDays
+include("Candles/Candles.jl")
+
+include("Ticker/Ticker.jl")
+
+include("Orderbook.jl")
+using .Orderbook
+
+include("Status/Status.jl")
 
 end

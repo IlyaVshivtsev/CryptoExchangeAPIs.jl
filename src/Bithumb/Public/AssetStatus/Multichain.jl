@@ -1,8 +1,8 @@
-module AssetStatus
+module Multichain
 
-export AssetStatusQuery,
-    AssetStatusData,
-    asset_status
+export MultichainQuery,
+    MultichainData,
+    multichain
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -11,13 +11,13 @@ using CryptoExchangeAPIs.Bithumb
 using CryptoExchangeAPIs.Bithumb: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef struct AssetStatusQuery <: BithumbPublicQuery
+Base.@kwdef struct MultichainQuery <: BithumbPublicQuery
     currency::Maybe{String} = "ALL"
 end
 
-Serde.SerQuery.ser_ignore_field(::Type{AssetStatusQuery}, ::Val{:currency}) = true
+Serde.SerQuery.ser_ignore_field(::Type{MultichainQuery}, ::Val{:currency}) = true
 
-struct AssetStatusData <: BithumbData
+struct MultichainData <: BithumbData
     currency::String
     net_type::String
     deposit_status::Bool
@@ -25,8 +25,8 @@ struct AssetStatusData <: BithumbData
 end
 
 """
-    asset_status(client::BithumbClient, query::AssetStatusQuery)
-    asset_status(client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config); kw...)
+    multichain(client::BithumbClient, query::MultichainQuery)
+    multichain(client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config); kw...)
 
 Provides information on the deposit/withdrawal status of virtual assets.
 
@@ -43,21 +43,20 @@ Provides information on the deposit/withdrawal status of virtual assets.
 ```julia
 using CryptoExchangeAPIs.Bithumb
 
-result = Bithumb.Public.asset_status(; 
+result = Bithumb.Public.AssetStatus.Multichain.multichain(; 
     currency = "ADA",
 )
 ```
 """
-function asset_status(client::BithumbClient, query::AssetStatusQuery)
-    return APIsRequest{Data{Vector{AssetStatusData}}}("GET", "public/assetsstatus/multichain/$(query.currency)", query)(client)
+function multichain(client::BithumbClient, query::MultichainQuery)
+    return APIsRequest{Data{Vector{MultichainData}}}("GET", "public/assetsstatus/multichain/$(query.currency)", query)(client)
 end
 
-function asset_status(
+function multichain(
     client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config);
     kw...
 )
-    return asset_status(client, AssetStatusQuery(; kw...))
+    return multichain(client, MultichainQuery(; kw...))
 end
 
 end
-

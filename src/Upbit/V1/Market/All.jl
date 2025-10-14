@@ -1,8 +1,7 @@
-module MarketAll
+module All
 
-export MarketAllQuery,
-    MarketAllData,
-    market_all
+export AllQuery,
+    AllData
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -10,7 +9,7 @@ using Dates, NanoDates, TimeZones
 using CryptoExchangeAPIs.Upbit
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef struct MarketAllQuery <: UpbitPublicQuery
+Base.@kwdef struct AllQuery <: UpbitPublicQuery
     isDetails::Bool = true
 end
 
@@ -27,7 +26,7 @@ struct MarketEvent <: UpbitData
     caution::Maybe{Caution}
 end
 
-struct MarketAllData <: UpbitData
+struct AllData <: UpbitData
     market::String
     english_name::String
     korean_name::String
@@ -35,8 +34,8 @@ struct MarketAllData <: UpbitData
 end
 
 """
-    market_all(client::UpbitClient, query::MarketAllQuery)
-    market_all(client::UpbitClient = Upbit.UpbitClient(Upbit.public_config); kw...)
+    all(client::UpbitClient, query::AllQuery)
+    all(client::UpbitClient = Upbit.UpbitClient(Upbit.public_config); kw...)
 
 Listing Market List
 
@@ -44,27 +43,28 @@ Listing Market List
 
 ## Parameters:
 
-| Parameter | Type     | Required | Description |
-|:----------|:---------|:---------|:------------|
-| isDetails | Bool     | false    |             |
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| isDetails | Bool | false    |             |
 
 ## Code samples:
 
 ```julia
 using CryptoExchangeAPIs.Upbit
 
-result = Upbit.V1.MarketAll.market_all()
+result = Upbit.V1.Market.all()
 ```
 """
-function market_all(client::UpbitClient, query::MarketAllQuery)
-    return APIsRequest{Vector{MarketAllData}}("GET", "v1/market/all", query)(client)
+function all(client::UpbitClient, query::AllQuery)
+    return APIsRequest{Vector{AllData}}("GET", "v1/market/all", query)(client)
 end
 
-function market_all(
+function all(
     client::UpbitClient = Upbit.UpbitClient(Upbit.public_config);
     kw...,
 )
-    return market_all(client, MarketAllQuery(; kw...))
+    return all(client, AllQuery(; kw...))
 end
 
 end
+

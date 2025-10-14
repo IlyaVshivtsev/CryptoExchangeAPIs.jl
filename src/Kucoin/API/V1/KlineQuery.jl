@@ -46,7 +46,7 @@ end
 
 """
     kline_query(client::KucoinClient, query::KlineQueryQuery)
-    kline_query(client::KucoinClient = Kucoin.Futures.public_client; kw...)
+    kline_query(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_futures_config); kw...)
 
 Request via this endpoint to get the kline of the specified symbol.
 
@@ -54,21 +54,21 @@ Request via this endpoint to get the kline of the specified symbol.
 
 ## Parameters:
 
-| Parameter        | Type         | Required | Description                         |
-|:-----------------|:-------------|:---------|:------------------------------------|
-| symbol           | String       | true     |                                     |
-| granularity      | TimeInterval | true     | m1 m5 m15 m30 h1 h2 h4 h8 h12 d1 w1 |
-| from             | NanoDate     | false    |                                     |
-| to               | NanoDate     | false    |                                     |
+| Parameter   | Type         | Required | Description                         |
+|:------------|:-------------|:---------|:------------------------------------|
+| symbol      | String       | true     |                                     |
+| granularity | TimeInterval | true     | m1 m5 m15 m30 h1 h2 h4 h8 h12 d1 w1 |
+| from        | NanoDate     | false    |                                     |
+| to          | NanoDate     | false    |                                     |
 
 ## Code samples:
 
 ```julia
 using CryptoExchangeAPIs.Kucoin
 
-result = Kucoin.Futures.kline_query(;
+result = Kucoin.API.V1.kline_query(;
     symbol = ".KXBT",
-    granularity = Kucoin.Futures.KlineQuery.m1,
+    granularity = Kucoin.API.V1.KlineQuery.TimeInterval.m1,
 )
 ```
 """
@@ -84,3 +84,4 @@ function kline_query(
 end
 
 end
+

@@ -1,8 +1,8 @@
-module CandlesDays
+module Days
 
-export CandlesDaysQuery,
-    CandlesDaysData,
-    candles_days
+export DaysQuery,
+    DaysData,
+    days
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -10,14 +10,14 @@ using Dates, NanoDates, TimeZones
 using CryptoExchangeAPIs.Upbit
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef struct CandlesDaysQuery <: UpbitPublicQuery
+Base.@kwdef struct DaysQuery <: UpbitPublicQuery
     market::String
     convertingPriceUnit::Maybe{String} = nothing
     count::Maybe{Int64} = nothing                  # Count of candles (LIMIT : 200)
     to::Maybe{DateTime} = nothing
 end
 
-struct CandlesDaysData <: UpbitData
+struct DaysData <: UpbitData
     market::Maybe{String}
     candle_acc_trade_price::Maybe{Float64}
     candle_acc_trade_volume::Maybe{Float64}
@@ -34,8 +34,8 @@ struct CandlesDaysData <: UpbitData
 end
 
 """
-    candles_days(client::UpbitClient, query::CandlesDaysQuery)
-    candles_days(client::UpbitClient = Upbit.UpbitClient(Upbit.public_config); kw...)
+    days(client::UpbitClient, query::DaysQuery)
+    days(client::UpbitClient = Upbit.UpbitClient(Upbit.public_config); kw...)
 
 Daily candle data.
 
@@ -55,20 +55,21 @@ Daily candle data.
 ```julia
 using CryptoExchangeAPIs.Upbit
 
-result = Upbit.V1.CandlesDays.candles_days(;
+result = Upbit.V1.Candles.days(;
     market = "KRW-BTC"
 )
 ```
 """
-function candles_days(client::UpbitClient, query::CandlesDaysQuery)
-    return APIsRequest{Vector{CandlesDaysData}}("GET", "v1/candles/days", query)(client)
+function days(client::UpbitClient, query::DaysQuery)
+    return APIsRequest{Vector{DaysData}}("GET", "v1/candles/days", query)(client)
 end
 
-function candles_days(
+function days(
     client::UpbitClient = Upbit.UpbitClient(Upbit.public_config);
     kw...,
 )
-    return candles_days(client, CandlesDaysQuery(; kw...))
+    return days(client, DaysQuery(; kw...))
 end
 
 end
+

@@ -1,8 +1,8 @@
-module Symbols
+module AllSymbols
 
-export SymbolsQuery,
-    SymbolsData,
-    symbols
+export AllSymbolsQuery,
+    AllSymbolsData,
+    all_symbols
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -11,11 +11,11 @@ using CryptoExchangeAPIs.Kucoin
 using CryptoExchangeAPIs.Kucoin: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef struct SymbolsQuery <: KucoinPublicQuery
+Base.@kwdef struct AllSymbolsQuery <: KucoinPublicQuery
     #__ empty
 end
 
-struct SymbolsData <: KucoinData
+struct AllSymbolsData <: KucoinData
     symbol::String
     baseCurrency::String
     quoteCurrency::String
@@ -36,28 +36,29 @@ struct SymbolsData <: KucoinData
 end
 
 """
-    symbols(client::KucoinClient, query::SymbolsQuery)
-    symbols(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
+    all_symbols(client::KucoinClient, query::AllSymbolsQuery)
+    all_symbols(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
 
 Request via this endpoint to get detail currency pairs for trading.
 
-[`GET /api/v2/symbols/{symbol}`](https://www.kucoin.com/docs/rest/spot-trading/market-data/get-symbols-list)
+[`GET /api/v2/symbols/`](https://www.kucoin.com/docs/rest/spot-trading/market-data/get-symbols-list)
 
 ## Code samples:
 
 ```julia
 using CryptoExchangeAPIs.Kucoin
 
-result = Kucoin.API.V2.Symbols.symbols()
+result = Kucoin.API.V2.Symbols.all_symbols()
 ```
 """
-function symbols(client::KucoinClient, query::SymbolsQuery)
+function all_symbols(client::KucoinClient, query::AllSymbolsQuery)
     end_point = "/api/v2/symbols/"
-    return APIsRequest{Data{Vector{SymbolsData}}}("GET", end_point, query)(client)
+    return APIsRequest{Data{Vector{AllSymbolsData}}}("GET", end_point, query)(client)
 end
 
-function symbols(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
-    return symbols(client, SymbolsQuery(; kw...))
+function all_symbols(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
+    return all_symbols(client, AllSymbolsQuery(; kw...))
 end
 
 end
+

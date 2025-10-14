@@ -1,8 +1,7 @@
-module Market
+module All
 
-export MarketQuery,
-    MarketData,
-    market
+export AllQuery,
+    AllData
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -10,19 +9,19 @@ using Dates, NanoDates, TimeZones
 using CryptoExchangeAPIs.Bithumb
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef struct MarketQuery <: BithumbPublicQuery
+Base.@kwdef struct AllQuery <: BithumbPublicQuery
     isDetails::Bool = false
 end
 
-struct MarketData <: BithumbData
+struct AllData <: BithumbData
     market::String
     korean_name::String
     english_name::String
 end
 
 """
-    market(client::BithumbClient, query::MarketQuery)
-    market(client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config); kw...)
+    all(client::BithumbClient, query::AllQuery)
+    all(client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config); kw...)
 
 List of markets available for trading on Bithumb.
 
@@ -39,18 +38,18 @@ List of markets available for trading on Bithumb.
 ```julia
 using CryptoExchangeAPIs.Bithumb
 
-result = Bithumb.V1.market()
+result = Bithumb.V1.Market.all()
 ```
 """
-function market(client::BithumbClient, query::MarketQuery)
-    return APIsRequest{Vector{MarketData}}("GET", "v1/market/all", query)(client)
+function all(client::BithumbClient, query::AllQuery)
+    return APIsRequest{Vector{AllData}}("GET", "v1/market/all", query)(client)
 end
 
-function market(
+function all(
     client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config);
     kw...
 )
-    return market(client, MarketQuery(; kw...))
+    return all(client, AllQuery(; kw...))
 end
 
 end

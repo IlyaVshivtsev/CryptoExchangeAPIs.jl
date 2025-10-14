@@ -1,7 +1,6 @@
 module V1
 
-include("Market.jl")
-using .Market
+include("Market/Market.jl")
 
 include("Ticker.jl")
 using .Ticker
