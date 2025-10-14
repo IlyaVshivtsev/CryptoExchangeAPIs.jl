@@ -99,6 +99,11 @@ const public_config = BinanceConfig(; base_url = "https://api.binance.com")
 const public_fapi_config = BinanceConfig(; base_url = "https://fapi.binance.com")
 
 """
+    public_dapi_config = BinanceConfig(; base_url = "https://dapi.binance.com")
+"""
+const public_dapi_config = BinanceConfig(; base_url = "https://dapi.binance.com")
+
+"""
     BinanceAPIError{T} <: AbstractAPIsError
 
 Exception thrown when an API method fails with code `T`.
@@ -181,6 +186,9 @@ using .SAPI
 
 include("FAPI/FAPI.jl")
 using .FAPI
+
+include("DAPI/DAPI.jl")
+using .DAPI
 
 include("Futures/Futures.jl")
 using .Futures

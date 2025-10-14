@@ -47,7 +47,7 @@ end
 
 """
     candlesticks(client::GateioClient, query::CandlesticksQuery)
-    candlesticks(client::GateioClient = Gateio.public_client; kw...)
+    candlesticks(client::GateioClient = Gateio.GateioClient(Gateio.public_config); kw...)
 
 Market candlesticks.
 
@@ -66,39 +66,22 @@ Market candlesticks.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Spot.candlesticks(;
     currency_pair = "BTC_USDT",
     interval = Gateio.API.V4.Spot.Candlesticks.TimeInterval.d1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "timestamp":"2023-12-17T00:00:00",
-    "quote_volume":2.43940917037979e8,
-    "close_price":41378.4,
-    "high_price":42421.6,
-    "low_price":41240.1,
-    "open_price":42275.6,
-    "base_amount":5819.36674398
-  },
-  ...
-]
 ```
 """
 function candlesticks(client::GateioClient, query::CandlesticksQuery)
     return APIsRequest{Vector{CandlesticksData}}("GET", "api/v4/spot/candlesticks", query)(client)
 end
 
-function candlesticks(client::GateioClient = Gateio.public_client; kw...)
+function candlesticks(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return candlesticks(client, CandlesticksQuery(; kw...))
 end
 

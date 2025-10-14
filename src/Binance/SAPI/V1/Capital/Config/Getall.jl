@@ -1,8 +1,8 @@
-module ConfigGetall
+module Getall
 
-export ConfigGetallQuery,
-    ConfigGetallData,
-    config_getall
+export GetallQuery,
+    GetallData,
+    getall
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -10,7 +10,7 @@ using Dates, NanoDates, TimeZones
 using CryptoExchangeAPIs.Binance
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef mutable struct ConfigGetallQuery <: BinancePrivateQuery
+Base.@kwdef mutable struct GetallQuery <: BinancePrivateQuery
     recvWindow::Maybe{Int64} = nothing
     signature::Maybe{String} = nothing
     timestamp::Maybe{DateTime} = nothing
@@ -44,7 +44,7 @@ struct Networklist <: BinanceData
     withdrawMin::Float64
 end
 
-struct ConfigGetallData <: BinanceData
+struct GetallData <: BinanceData
     coin::String
     depositAllEnable::Bool
     free::Float64
@@ -62,8 +62,8 @@ struct ConfigGetallData <: BinanceData
 end
 
 """
-    config_getall(client::BinanceClient, query::ConfigGetallQuery)
-    config_getall(client::BinanceClient; kw...)
+    getall(client::BinanceClient, query::GetallQuery)
+    getall(client::BinanceClient; kw...)
 
 Get information of coins (available for deposit and withdraw) for user.
 
@@ -80,7 +80,6 @@ Get information of coins (available for deposit and withdraw) for user.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 binance_client = BinanceClient(;
@@ -89,69 +88,15 @@ binance_client = BinanceClient(;
     secret_key = ENV["BINANCE_SECRET_KEY"],
 )
 
-result = Binance.SAPI.V1.Capital.config_getall(binance_client)
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "coin":"ADA",
-    "depositAllEnable":true,
-    "free":0.0,
-    "freeze":0.0,
-    "ipoable":0.0,
-    "ipoing":0.0,
-    "isLegalMoney":false,
-    "locked":0.0,
-    "name":"Cardano",
-    "networkList":[
-      {
-        "addressRegex":"^(([0-9A-Za-z]{57,59})|([0-9A-Za-z]{100,104}))\$",
-        "addressRule":null,
-        "busy":false,
-        "coin":"ADA",
-        "country":null,
-        "depositDesc":"",
-        "depositDust":1.0e-6,
-        "depositEnable":true,
-        "estimatedArrivalTime":"1970-01-01T00:00:00",
-        "isDefault":true,
-        "memoRegex":"",
-        "minConfirm":30,
-        "name":"Cardano",
-        "network":"ADA",
-        "resetAddressStatus":false,
-        "sameAddress":false,
-        "specialTips":"",
-        "specialWithdrawTips":null,
-        "unLockConfirm":0,
-        "withdrawDesc":"",
-        "withdrawEnable":true,
-        "withdrawFee":0.8,
-        "withdrawIntegerMultiple":1.0e-6,
-        "withdrawMax":5.0e7,
-        "withdrawMin":2.0
-      }
-    ],
-    "storage":0.0,
-    "trading":true,
-    "withdrawAllEnable":true,
-    "withdrawing":0.0
-  },
-  ...
-]
+result = Binance.SAPI.V1.Capital.Config.getall(binance_client)
 ```
 """
-function config_getall(client::BinanceClient, query::ConfigGetallQuery)
-    return APIsRequest{Vector{ConfigGetallData}}("GET", "sapi/v1/capital/config/getall", query)(client)
+function getall(client::BinanceClient, query::GetallQuery)
+    return APIsRequest{Vector{GetallData}}("GET", "sapi/v1/capital/config/getall", query)(client)
 end
 
-function config_getall(client::BinanceClient; kw...)
-    return config_getall(client, ConfigGetallQuery(; kw...))
+function getall(client::BinanceClient; kw...)
+    return getall(client, GetallQuery(; kw...))
 end
 
 end

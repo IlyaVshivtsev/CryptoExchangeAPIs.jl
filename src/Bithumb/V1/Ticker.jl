@@ -53,7 +53,7 @@ end
 
 """
     ticker(client::BithumbClient, query::TickerQuery)
-    ticker(client::BithumbClient = Bithumb.Spot.public_client; kw...)
+    ticker(client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config); kw...)
 
 Provides snapshot information of symbols at the time of request.
 
@@ -68,56 +68,21 @@ Provides snapshot information of symbols at the time of request.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Bithumb
 
-result = Bithumb.Spot.ticker(;
+result = Bithumb.V1.Ticker.ticker(;
     markets = "KRW-BTC,KRW-ETH",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "market": "KRW-BTC",
-    "trade_date": "20250630",
-    "trade_time": "123643",
-    "trade_date_kst": "20250630",
-    "trade_time_kst": "213643",
-    "trade_timestamp": 1751319403641,
-    "opening_price": 147950000,
-    "high_price": 148500000,
-    "low_price": 146580000,
-    "trade_price": 147054000,
-    "prev_closing_price": 147950000,
-    "change": "FALL",
-    "change_price": 896000,
-    "change_rate": 0.0061,
-    "signed_change_price": -896000,
-    "signed_change_rate": -0.0061,
-    "trade_volume": 0.000068,
-    "acc_trade_price": 41616026654.1438,
-    "acc_trade_price_24h": 46041602331.625,
-    "acc_trade_volume": 282.15301032,
-    "acc_trade_volume_24h": 312.0425921,
-    "highest_52_week_price": 163460000,
-    "highest_52_week_date": "2025-01-21",
-    "lowest_52_week_price": 71573000,
-    "lowest_52_week_date": "2024-08-06",
-    "timestamp": 1751287007250
-  }
-]
 ```
 """
 function ticker(client::BithumbClient, query::TickerQuery)
     return APIsRequest{Vector{TickerData}}("GET", "v1/ticker", query)(client)
 end
 
-function ticker(client::BithumbClient = Bithumb.public_client; kw...)
+function ticker(
+    client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config);
+    kw...,
+)
     return ticker(client, TickerQuery(; kw...))
 end
 

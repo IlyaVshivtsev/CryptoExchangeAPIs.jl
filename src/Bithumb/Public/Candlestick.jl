@@ -47,7 +47,7 @@ end
 
 """
     candlestick(client::BithumbClient, query::CandlestickQuery)
-    candlestick(client::BithumbClient = Bithumb.Spot.public_client; kw...)
+    candlestick(client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config); kw...)
 
 Provides virtual asset price and trading volume information by time and section.
 
@@ -64,36 +64,13 @@ Provides virtual asset price and trading volume information by time and section.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Bithumb
 
-result = Bithumb.Spot.candlestick(;
+result = Bithumb.Public.Candlestick.candlestick(;
     order_currency = "BTC",
     payment_currency = "KRW",
-    interval = Bithumb.Spot.Candlestick.h24,
+    interval = Bithumb.Public.Candlestick.TimeInterval.h24,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "status":"0000",
-  "date":null,
-  "data":[
-    {
-      "timestamp":"2024-05-14T15:00:00",
-      "open":8.6639e7,
-      "close":8.6419e7,
-      "high":8.6845e7,
-      "low":8.575e7,
-      "vol":216.48937355
-    },
-    ...
-  ]
-}
 ```
 """
 function candlestick(client::BithumbClient, query::CandlestickQuery)
@@ -101,7 +78,10 @@ function candlestick(client::BithumbClient, query::CandlestickQuery)
     return APIsRequest{Data{Vector{CandlestickData}}}("GET", "public/candlestick/$(query.order_currency)_$(query.payment_currency)/$timeframe", query)(client)
 end
 
-function candlestick(client::BithumbClient = Bithumb.public_client; kw...)
+function candlestick(
+    client::BithumbClient = Bithumb.BithumbClient(Bithumb.public_config);
+    kw...,
+)
     return candlestick(client, CandlestickQuery(; kw...))
 end
 

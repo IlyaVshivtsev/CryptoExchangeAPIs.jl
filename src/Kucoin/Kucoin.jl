@@ -9,10 +9,15 @@ export KucoinCommonQuery,
     KucoinData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type KucoinData <: AbstractAPIsData end
 abstract type KucoinCommonQuery  <: AbstractAPIsQuery end
@@ -51,9 +56,9 @@ struct Page{D<:AbstractAPIsData} <:AbstractAPIsData
 end
 
 """
-    KucoinClient <: AbstractAPIsClient
+    KucoinConfig <: AbstractAPIsConfig
 
-Client info.
+Gate.io client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -61,12 +66,13 @@ Client info.
 ## Optional fields
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
+- `passphrase::String`: Passphrase for authentication.
 - `interface::String`: Interface for the client.
 - `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct KucoinClient <: AbstractAPIsClient
+Base.@kwdef struct KucoinConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -78,14 +84,50 @@ Base.@kwdef struct KucoinClient <: AbstractAPIsClient
 end
 
 """
-    public_client = KucoinClient(; base_url = "https://api.kucoin.com")
+    KucoinClient <: AbstractAPIsClient
+
+Client for interacting with Gate.io exchange API.
+
+## Fields
+- `config::KucoinConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = KucoinClient(; base_url = "https://api.kucoin.com")
+mutable struct KucoinClient <: AbstractAPIsClient
+    config::KucoinConfig
+    curl_client::CurlClient
+
+    function KucoinClient(config::KucoinConfig)
+        new(config, CurlClient())
+    end
+
+    function KucoinClient(; kw...)
+        return KucoinClient(KucoinConfig(; kw...))
+    end
+end
 
 """
-    public_client = KucoinClient(; base_url = "https://api-futures.kucoin.com")
+    isopen(client::KucoinClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
 """
-const public_futures_client = KucoinClient(; base_url = "https://api-futures.kucoin.com")
+Base.isopen(c::KucoinClient) = isopen(c.curl_client)
+
+"""
+    close(client::KucoinClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::KucoinClient) = close(c.curl_client)
+
+"""
+    public_config = KucoinConfig(; base_url = "https://api.kucoin.com")
+"""
+const public_config = KucoinConfig(; base_url = "https://api.kucoin.com")
+
+"""
+    public_config = KucoinConfig(; base_url = "https://api-futures.kucoin.com")
+"""
+const public_futures_config = KucoinConfig(; base_url = "https://api-futures.kucoin.com")
 
 """
     KucoinAPIError{T} <: AbstractAPIsError
@@ -119,8 +161,8 @@ function CryptoExchangeAPIs.request_sign!(client::KucoinClient, query::Q, endpoi
     query.timestamp = Dates.now(UTC)
     query.signature = nothing
     salt = join([string(round(Int64, 1000 * datetime2unix(query.timestamp))), "GET/$endpoint?", Serde.to_query(query)])
-    query.passphrase = Base64.base64encode(digest("sha256", client.secret_key, client.passphrase))
-    query.signature = Base64.base64encode(digest("sha256", client.secret_key, salt))
+    query.passphrase = Base64.base64encode(digest("sha256", client.config.secret_key, client.config.passphrase))
+    query.signature = Base64.base64encode(digest("sha256", client.config.secret_key, salt))
     return query
 end
 
@@ -142,7 +184,7 @@ function CryptoExchangeAPIs.request_headers(client::KucoinClient, query::KucoinP
     return Pair{String,String}[
         "KC-API-SIGN" => query.signature,
         "KC-API-TIMESTAMP" => string(round(Int64, 1000 * datetime2unix(query.timestamp))),
-        "KC-API-KEY" => client.public_key,
+        "KC-API-KEY" => client.config.public_key,
         "KC-API-PASSPHRASE" => query.passphrase,
         "Content-Type" => "application/json",
         "KC-API-KEY-VERSION" => "2",

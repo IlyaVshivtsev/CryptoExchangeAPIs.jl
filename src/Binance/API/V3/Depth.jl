@@ -42,36 +42,11 @@ end
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 result = Binance.API.V3.depth(;
     symbol = "ADAUSDT"
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "asks":[
-    {
-      "price":0.634,
-      "size":1478.6
-    },
-    ...
-  ],
-  "bids":[
-    {
-      "price":0.6339,
-      "size":28448.6
-    },
-    ...
-  ],
-  "lastUpdateId":8394873195
-}
 ```
 """
 function depth(client::BinanceClient, query::DepthQuery)

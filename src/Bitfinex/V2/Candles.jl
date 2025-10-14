@@ -54,7 +54,7 @@ end
 
 """
     candles(client::BitfinexClient, query::CandlesQuery)
-    candles(client::BitfinexClient = Bitfinex.public_client; kw...)
+    candles(client::BitfinexClient = Bitfinex.BitfinexClient(Bitfinex.public_config); kw...)
 
 The Candles endpoint provides OCHL (Open, Close, High, Low) and volume data for the specified funding currency or trading pair.
 The endpoint provides the last 100 candles by default, but a limit and a start and/or end timestamp can be specified.
@@ -75,7 +75,6 @@ The endpoint provides the last 100 candles by default, but a limit and a start a
 ## Code samples:
 
 ```julia
-using Serde
 using Dates
 using CryptoExchangeAPIs.Bitfinex
 
@@ -85,24 +84,6 @@ result = Bitfinex.V2.candles(;
     start = now(UTC) - Minute(100),
     _end = now(UTC) - Minute(10),
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "timestamp":"2024-05-19T14:35:00",
-    "open":67089.0,
-    "close":67032.0,
-    "high":67089.0,
-    "low":67032.0,
-    "volume":0.32812637
-  },
-  ...
-]
 ```
 """
 function candles(client::BitfinexClient, query::CandlesQuery)
@@ -115,7 +96,10 @@ function candles(client::BitfinexClient, query::CandlesQuery)
     end
 end
 
-function candles(client::BitfinexClient = Bitfinex.public_client; kw...)
+function candles(
+    client::BitfinexClient = Bitfinex.BitfinexClient(Bitfinex.public_config);
+    kw...,
+)
     return candles(client, CandlesQuery(; kw...))
 end
 

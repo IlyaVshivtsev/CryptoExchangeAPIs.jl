@@ -55,7 +55,7 @@ end
 
 """
     candles(client::OkexClient, query::CandlesQuery)
-    candles(client::OkexClient = Okex.Spot.public_client; kw...)
+    candles(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
 
 Retrieve the candlestick charts.
 
@@ -74,45 +74,19 @@ Retrieve the candlestick charts.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Okex
 
-result = Okex.Spot.candles(;
+result = Okex.API.V5.Market.candles(;
     instId = "BTC-USDT",
-    bar = Okex.Spot.Candles.d1,
+    bar = Okex.API.V5.Market.Candles.TimeInterval.d1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "msg":"",
-  "code":0,
-  "data":[
-    {
-      "openTime":"2024-04-11T00:00:00",
-      "openPrice":70637.1,
-      "highPrice":71315.9,
-      "lowPrice":69544.8,
-      "closePrice":70211.3,
-      "vol":9281.9689485,
-      "volCcy":6.537022764980018e8,
-      "volCcyQuote":6.537022764980018e8,
-      "confirm":0
-    },
-    ...
-  ]
-}
 ```
 """
 function candles(client::OkexClient, query::CandlesQuery)
     return APIsRequest{Data{CandlesData}}("GET", "api/v5/market/candles", query)(client)
 end
 
-function candles(client::OkexClient = Okex.public_client; kw...)
+function candles(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
     return candles(client, CandlesQuery(; kw...))
 end
 

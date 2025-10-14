@@ -48,28 +48,11 @@ Get funding rate history.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 result = Binance.FAPI.V1.funding_rate(;
     symbol = "BTCUSDT",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "symbol":"BTCUSDT",
-    "fundingRate":0.00011242,
-    "fundingTime":"2024-02-21T08:00:00",
-    "markPrice":51595.13521986
-  },
-  ...
-]
 ```
 """
 function funding_rate(client::BinanceClient, query::FundingRateQuery)

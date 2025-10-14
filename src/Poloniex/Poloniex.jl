@@ -9,10 +9,16 @@ export PoloniexCommonQuery,
     PoloniexData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type PoloniexData <: AbstractAPIsData end
 abstract type PoloniexCommonQuery  <: AbstractAPIsQuery end
@@ -21,9 +27,9 @@ abstract type PoloniexAccessQuery  <: PoloniexCommonQuery end
 abstract type PoloniexPrivateQuery <: PoloniexCommonQuery end
 
 """
-    PoloniexClient <: AbstractAPIsClient
+    PoloniexConfig <: AbstractAPIsConfig
 
-Client info.
+Poloniex client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -36,7 +42,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct PoloniexClient <: AbstractAPIsClient
+Base.@kwdef struct PoloniexConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -47,9 +53,45 @@ Base.@kwdef struct PoloniexClient <: AbstractAPIsClient
 end
 
 """
-    public_client = PoloniexClient(; base_url = "https://api.poloniex.com")
+    PoloniexClient <: AbstractAPIsClient
+
+Client for interacting with Poloniex exchange API.
+
+## Fields
+- `config::PoloniexConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = PoloniexClient(; base_url = "https://api.poloniex.com")
+mutable struct PoloniexClient <: AbstractAPIsClient
+    config::PoloniexConfig
+    curl_client::CurlClient
+
+    function PoloniexClient(config::PoloniexConfig)
+        new(config, CurlClient())
+    end
+
+    function PoloniexClient(; kw...)
+        return PoloniexClient(PoloniexConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::PoloniexClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::PoloniexClient) = isopen(c.curl_client)
+
+"""
+    close(client::PoloniexClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::PoloniexClient) = close(c.curl_client)
+
+"""
+    public_config = PoloniexConfig(; base_url = "https://api.poloniex.com")
+"""
+const public_config = PoloniexConfig(; base_url = "https://api.poloniex.com")
 
 """
     PoloniexAPIError{T} <: AbstractAPIsError
@@ -85,7 +127,7 @@ function CryptoExchangeAPIs.request_sign!(client::PoloniexClient, query::Q, endp
     body::String = Serde.to_query(query)
     acces_endpoint = "/$endpoint"
     salt = join(["GET", acces_endpoint, body], "\n")
-    query.signature = Base64.base64encode(digest("sha256", client.secret_key, salt))
+    query.signature = Base64.base64encode(digest("sha256", client.config.secret_key, salt))
     return query
 end
 
@@ -107,13 +149,13 @@ end
 
 function CryptoExchangeAPIs.request_headers(client::PoloniexClient, ::PoloniexPublicQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "Content-Type" => "application/json"
+        "Content-Type" => "application/json",
     ]
 end
 
 function CryptoExchangeAPIs.request_headers(client::PoloniexClient, query::PoloniexPrivateQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "key" => client.public_key,
+        "key" => client.config.public_key,
         "signTimestamp" => timestamp(NanoDate(query.signTimestamp)),
         "signature" => query.signature,
     ]

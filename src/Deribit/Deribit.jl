@@ -9,10 +9,16 @@ export DeribitCommonQuery,
     DeribitData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type DeribitData <: AbstractAPIsData end
 abstract type DeribitCommonQuery  <: AbstractAPIsQuery end
@@ -45,9 +51,9 @@ struct Data{D<:Union{Vector{A},A} where {A<:AbstractAPIsData}} <: AbstractAPIsDa
 end
 
 """
-    DeribitClient <: AbstractAPIsClient
+    DeribitConfig <: AbstractAPIsConfig
 
-Client info.
+Deribit client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -60,7 +66,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct DeribitClient <: AbstractAPIsClient
+Base.@kwdef struct DeribitConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -71,9 +77,45 @@ Base.@kwdef struct DeribitClient <: AbstractAPIsClient
 end
 
 """
-    public_client = DeribitClient(; base_url = "https://www.deribit.com")
+    DeribitClient <: AbstractAPIsClient
+
+Client for interacting with Deribit exchange API.
+
+## Fields
+- `config::DeribitConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = DeribitClient(; base_url = "https://www.deribit.com")
+mutable struct DeribitClient <: AbstractAPIsClient
+    config::DeribitConfig
+    curl_client::CurlClient
+
+    function DeribitClient(config::DeribitConfig)
+        new(config, CurlClient())
+    end
+
+    function DeribitClient(; kw...)
+        return DeribitClient(DeribitConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::DeribitClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::DeribitClient) = isopen(c.curl_client)
+
+"""
+    close(client::DeribitClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::DeribitClient) = close(c.curl_client)
+
+"""
+    public_config = DeribitConfig(; base_url = "https://www.deribit.com")
+"""
+const public_config = DeribitConfig(; base_url = "https://www.deribit.com")
 
 """
     DeribitAPIsErrorMsg <: AbstractAPIsError
@@ -139,7 +181,7 @@ end
 
 function CryptoExchangeAPIs.request_headers(client::DeribitClient, ::DeribitPublicQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "Content-Type" => "application/json"
+        "Content-Type" => "application/json",
     ]
 end
 

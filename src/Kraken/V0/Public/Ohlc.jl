@@ -63,7 +63,7 @@ end
 
 """
     ohlc(client::KrakenClient, query::OhlcQuery)
-    ohlc(client::KrakenClient = Kraken.Spot.public_client; kw...)
+    ohlc(client::KrakenClient = Kraken.KrakenClient(Kraken.public_config); kw...)
 
 Get OHLC data for a given market.
 
@@ -80,48 +80,20 @@ Get OHLC data for a given market.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Kraken
 
-result = Kraken.Spot.ohlc(;
+result = Kraken.V0.Public.ohlc(;
     pair = "ACAUSD",
-    interval = CryptoExchangeAPIs.Kraken.Spot.Ohlc.h1,
+    interval = Kraken.V0.Public.Ohlc.TimeInterval.h1,
     since = now(UTC) - Hour(1),
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "error":[],
-  "result":{
-    "ACAUSD":
-    [
-      {
-        "time":"2024-05-15T17:00:00",
-        "open":0.106,
-        "high":0.106,
-        "low":0.106,
-        "close":0.106,
-        "vwap":0.0,
-        "volume":0.0,
-        "count":0,
-        "last":"2024-05-15T16:45:00"
-      },
-      ...
-    ]
-  }
-}
 ```
 """
 function ohlc(client::KrakenClient, query::OhlcQuery)
     return APIsRequest{Data{Dict{String,Vector{OhlcData}}}}("GET", "0/public/OHLC", query)(client)
 end
 
-function ohlc(client::KrakenClient = Kraken.public_client; kw...)
+function ohlc(client::KrakenClient = Kraken.KrakenClient(Kraken.public_config); kw...)
     return ohlc(client, OhlcQuery(; kw...))
 end
 

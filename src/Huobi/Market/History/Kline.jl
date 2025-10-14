@@ -45,7 +45,7 @@ end
 
 """
     kline(client::HuobiClient, query::KlineQuery)
-    kline(client::HuobiClient = Huobi.Spot.public_client; kw...)
+    kline(client::HuobiClient = Huobi.HuobiClient(Huobi.public_config); kw...)
 
 This endpoint retrieves all klines in a specific range.
 
@@ -62,46 +62,19 @@ This endpoint retrieves all klines in a specific range.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Huobi
 
-result = Huobi.Spot.kline(;
+result = Huobi.Market.History.kline(;
     symbol = "btcusdt",
-    period = CryptoExchangeAPIs.Huobi.Spot.Kline.m1,
+    period = Huobi.Market.History.Kline.TimeInterval.m1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "status":"ok",
-  "ch":"market.btcusdt.kline.1min",
-  "ts":"2024-05-16T12:50:25.071000064",
-  "code":null,
-  "data":[
-    {
-      "amount":0.298096,
-      "close":66300.0,
-      "count":34,
-      "high":66318.86,
-      "id":"2024-05-16T12:50:00",
-      "low":66268.18,
-      "open":66268.18,
-      "vol":19766.85497792
-    },
-    ...
-  ]
-}
 ```
 """
 function kline(client::HuobiClient, query::KlineQuery)
     return APIsRequest{Data{Vector{KlineData}}}("GET", "market/history/kline", query)(client)
 end
 
-function kline(client::HuobiClient = Huobi.public_client; kw...)
+function kline(client::HuobiClient = Huobi.HuobiClient(Huobi.public_config); kw...)
     return kline(client, KlineQuery(; kw...))
 end
 

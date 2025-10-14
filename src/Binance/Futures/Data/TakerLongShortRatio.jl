@@ -59,29 +59,12 @@ end
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 result = Binance.Futures.Data.taker_long_short_ratio(;
     symbol = "BTCUSDT",
     period = Binance.Futures.Data.TakerLongShortRatio.TimeInterval.h1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "buySellRatio":0.6366,
-    "buyVol":1277.042,
-    "sellVol":2005.878,
-    "timestamp":"2024-03-30T14:00:00"
-  },
-  ...
-]
 ```
 """
 function taker_long_short_ratio(client::BinanceClient, query::TakerLongShortRatioQuery)

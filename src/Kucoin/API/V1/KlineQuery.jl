@@ -64,41 +64,22 @@ Request via this endpoint to get the kline of the specified symbol.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Kucoin
 
 result = Kucoin.Futures.kline_query(;
     symbol = ".KXBT",
     granularity = Kucoin.Futures.KlineQuery.m1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "code":200000,
-  "data":[
-    {
-      "time":"2024-05-14T20:37:00",
-      "open":61593.03,
-      "close":61593.82,
-      "high":61593.02,
-      "low":61593.82,
-      "volume":0.0
-    },
-    ...
-  ]
-}
 ```
 """
 function kline_query(client::KucoinClient, query::KlineQueryQuery)
     return APIsRequest{Data{Vector{KlineQueryData}}}("GET", "api/v1/kline/query", query)(client)
 end
 
-function kline_query(client::KucoinClient = Kucoin.public_futures_client; kw...)
+function kline_query(
+    client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_futures_config);
+    kw...,
+)
     return kline_query(client, KlineQueryQuery(; kw...))
 end
 

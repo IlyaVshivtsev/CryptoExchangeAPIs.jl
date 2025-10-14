@@ -9,10 +9,16 @@ export BitfinexCommonQuery,
     BitfinexData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type BitfinexData <: AbstractAPIsData end
 abstract type BitfinexCommonQuery  <: AbstractAPIsQuery end
@@ -21,9 +27,9 @@ abstract type BitfinexAccessQuery  <: BitfinexCommonQuery end
 abstract type BitfinexPrivateQuery <: BitfinexCommonQuery end
 
 """
-    BitfinexClient <: AbstractAPIsClient
+    BitfinexConfig <: AbstractAPIsConfig
 
-Client info.
+Bitfinex client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -36,7 +42,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct BitfinexClient <: AbstractAPIsClient
+Base.@kwdef struct BitfinexConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -47,9 +53,45 @@ Base.@kwdef struct BitfinexClient <: AbstractAPIsClient
 end
 
 """
-    public_client = BitfinexClient(; base_url = "https://api-pub.bitfinex.com")
+    BitfinexClient <: AbstractAPIsClient
+
+Client for interacting with Bitfinex exchange API.
+
+## Fields
+- `config::BitfinexConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = BitfinexClient(; base_url = "https://api-pub.bitfinex.com")
+mutable struct BitfinexClient <: AbstractAPIsClient
+    config::BitfinexConfig
+    curl_client::CurlClient
+
+    function BitfinexClient(config::BitfinexConfig)
+        new(config, CurlClient())
+    end
+
+    function BitfinexClient(; kw...)
+        return BitfinexClient(BitfinexConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::BitfinexClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::BitfinexClient) = isopen(c.curl_client)
+
+"""
+    close(client::BitfinexClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::BitfinexClient) = close(c.curl_client)
+
+"""
+    public_config = BitfinexConfig(; base_url = "https://api-pub.bitfinex.com")
+"""
+const public_config = BitfinexConfig(; base_url = "https://api-pub.bitfinex.com")
 
 """
     BitfinexAPIError{T} <: AbstractAPIsError
@@ -84,7 +126,7 @@ end
 function CryptoExchangeAPIs.request_sign!(client::BitfinexClient, query::Q, endpoint::String)::Nothing where {Q<:BitfinexPrivateQuery}
     query.nonce = string(round(Int64, 1000 * datetime2unix(now(UTC))))   
     signature_payload = string("/api/", endpoint, query.nonce)
-    query.signature = hexdigest("sha384", client.secret_key, signature_payload)
+    query.signature = hexdigest("sha384", client.config.secret_key, signature_payload)
     return nothing
 end
 
@@ -105,7 +147,7 @@ end
 function CryptoExchangeAPIs.request_headers(client::BitfinexClient, query::BitfinexPrivateQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
         "bfx-signature" => query.signature,
-        "bfx-apikey" => client.public_key,
+        "bfx-apikey" => client.config.public_key,
         "bfx-nonce" => query.nonce,
         "Content-type" => "application/json",
     ]

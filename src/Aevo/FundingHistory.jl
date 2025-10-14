@@ -30,7 +30,7 @@ end
 
 """
     funding_history(client::AevoClient, query::FundingHistoryQuery)
-    funding_history(client::AevoClient = Aevo.Futures.public_client; kw...)
+    funding_history(client::AevoClient = Aevo.AevoClient(Aevo.public_config); kw...)
 
 Returns the funding rate history for the instrument.
 
@@ -39,37 +39,21 @@ Returns the funding rate history for the instrument.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Aevo
 
-result = Aevo.Futures.funding_history(; 
+result = Aevo.funding_history(; 
     instrument_name = "ETH-PERP",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "funding_history":[
-    {
-      "instrument_name":"ETH-PERP",
-      "timestamp":"2024-07-08T22:00:00",
-      "funding_rate":2.0e-6,
-      "mark_price":3026.093939
-    },
-    ...
-  ]
-}
 ```
 """
 function funding_history(client::AevoClient, query::FundingHistoryQuery)
     return APIsRequest{FundingHistoryData}("GET", "funding-history", query)(client)
 end
 
-function funding_history(client::AevoClient = Aevo.public_client; kw...)
+function funding_history(
+    client::AevoClient = Aevo.AevoClient(Aevo.public_config);
+    kw...,
+)
     return funding_history(client, FundingHistoryQuery(; kw...))
 end
 

@@ -9,10 +9,15 @@ export HuobiCommonQuery,
     HuobiData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type HuobiData <: AbstractAPIsData end
 abstract type HuobiCommonQuery  <: AbstractAPIsQuery end
@@ -62,9 +67,9 @@ struct DataTick{D} <: AbstractAPIsData
 end
 
 """
-    HuobiClient <: AbstractAPIsClient
+    HuobiConfig <: AbstractAPIsConfig
 
-Client info.
+Huobi client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -77,7 +82,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct HuobiClient <: AbstractAPIsClient
+Base.@kwdef struct HuobiConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -88,9 +93,45 @@ Base.@kwdef struct HuobiClient <: AbstractAPIsClient
 end
 
 """
-    public_client = HuobiClient(; base_url = "https://api.huobi.pro")
+    HuobiClient <: AbstractAPIsClient
+
+Client for interacting with Gate.io exchange API.
+
+## Fields
+- `config::HuobiConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = HuobiClient(; base_url = "https://api.huobi.pro")
+mutable struct HuobiClient <: AbstractAPIsClient
+    config::HuobiConfig
+    curl_client::CurlClient
+
+    function HuobiClient(config::HuobiConfig)
+        new(config, CurlClient())
+    end
+
+    function HuobiClient(; kw...)
+        return HuobiClient(HuobiConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::HuobiClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::HuobiClient) = isopen(c.curl_client)
+
+"""
+    close(client::HuobiClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::HuobiClient) = close(c.curl_client)
+
+"""
+    public_config = HuobiConfig(; base_url = "https://api.huobi.pro")
+"""
+const public_config = HuobiConfig(; base_url = "https://api.huobi.pro")
 
 """
     HuobiAPIError{T} <: AbstractAPIsError
@@ -130,16 +171,16 @@ function CryptoExchangeAPIs.request_sign!(::HuobiClient, query::Q, ::String)::Q 
 end
 
 function CryptoExchangeAPIs.request_sign!(client::HuobiClient, query::Q, endpoint::String)::Nothing where {Q<:HuobiPrivateQuery}
-    query.AccessKeyId = client.public_key
+    query.AccessKeyId = client.config.public_key
     query.Timestamp = now(UTC)
     query.SignatureMethod = "HmacSHA256"
     query.SignatureVersion  = "2"
     query.Signature = nothing
     body::String = Serde.to_query(query)
     endpoint = string("/", endpoint)
-    host = last(split(client.base_url, "//"))
+    host = last(split(client.config.base_url, "//"))
     salt = join(["GET", host, endpoint, body], "\n")
-    query.Signature = Base64.base64encode(digest("sha256", client.secret_key, salt))
+    query.Signature = Base64.base64encode(digest("sha256", client.config.secret_key, salt))
     return nothing
 end
 

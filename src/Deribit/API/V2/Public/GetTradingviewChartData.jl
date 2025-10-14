@@ -49,7 +49,7 @@ end
 
 """
     get_tradingview_chart_data(client::DeribitClient, query::GetTradingviewChartDataQuery)
-    get_tradingview_chart_data(client::DeribitClient = Deribit.Common.public_client; kw...)
+    get_tradingview_chart_data(client::DeribitClient = Deribit.DeribitClient(Deribit.public_config); kw...)
 
 Publicly available market data used to generate a TradingView get_tradingview_chart_data chart.
 
@@ -67,68 +67,24 @@ Publicly available market data used to generate a TradingView get_tradingview_ch
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Deribit
 
-result = Deribit.Common.get_tradingview_chart_data(;
+result = Deribit.API.V2.Public.get_tradingview_chart_data(;
     instrument_name = "BTC-PERPETUAL",
     start_timestamp = now(UTC) - Minute(100),
     end_timestamp = now(UTC) - Hour(1),
-    resolution = CryptoExchangeAPIs.Deribit.Common.GetTradingviewChartData.m1,
+    resolution = Deribit.API.V2.Public.GetTradingviewChartData.TimeInterval.m1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "id":null,
-  "jsonrpc":"2.0",
-  "testnet":false,
-  "usDiff":1746,
-  "usOut":"2024-05-17T11:57:46.222272",
-  "usIn":"2024-05-17T11:57:46.220526080",
-  "result":{
-    "close":[
-      66324.5,
-      ...
-    ],
-    "cost":[
-      101810.0,
-      ...
-    ],
-    "high":[
-      66324.5,
-      ...
-    ],
-    "low":[
-      66323.0,
-      ...
-    ],
-    "open":[
-      66323.0,
-      ...
-    ],
-    "status":"ok",
-    "ticks":[
-      "2024-05-17T10:17:00",
-      ...
-    ],
-    "volume":[
-      1.53504587,
-      ...
-    ]
-  }
-}
 ```
 """
 function get_tradingview_chart_data(client::DeribitClient, query::GetTradingviewChartDataQuery)
     return APIsRequest{Data{GetTradingviewChartDataData}}("GET", "api/v2/public/get_tradingview_chart_data", query)(client)
 end
 
-function get_tradingview_chart_data(client::DeribitClient = Deribit.public_client; kw...)
+function get_tradingview_chart_data(
+    client::DeribitClient = Deribit.DeribitClient(Deribit.public_config);
+    kw...,
+)
     return get_tradingview_chart_data(client, GetTradingviewChartDataQuery(; kw...))
 end
 

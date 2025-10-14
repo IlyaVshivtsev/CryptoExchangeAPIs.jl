@@ -9,10 +9,15 @@ export OkexCommonQuery,
     OkexData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type OkexData <: AbstractAPIsData end
 abstract type OkexCommonQuery  <: AbstractAPIsQuery end
@@ -40,9 +45,9 @@ struct Data{D<:AbstractAPIsData} <: AbstractAPIsData
 end
 
 """
-    OkexClient <: AbstractAPIsClient
+    OkexConfig <: AbstractAPIsConfig
 
-Client info.
+Gate.io client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -50,12 +55,13 @@ Client info.
 ## Optional fields
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
+- `passphrase::String`: Passphrase for authentication.
 - `interface::String`: Interface for the client.
 - `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct OkexClient <: AbstractAPIsClient
+Base.@kwdef struct OkexConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -67,9 +73,45 @@ Base.@kwdef struct OkexClient <: AbstractAPIsClient
 end
 
 """
-    public_client = OkexClient(; base_url = "https://www.okx.com")
+    OkexClient <: AbstractAPIsClient
+
+Client for interacting with Gate.io exchange API.
+
+## Fields
+- `config::OkexConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = OkexClient(; base_url = "https://www.okx.com")
+mutable struct OkexClient <: AbstractAPIsClient
+    config::OkexConfig
+    curl_client::CurlClient
+
+    function OkexClient(config::OkexConfig)
+        new(config, CurlClient())
+    end
+
+    function OkexClient(; kw...)
+        return OkexClient(OkexConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::OkexClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::OkexClient) = isopen(c.curl_client)
+
+"""
+    close(client::OkexClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::OkexClient) = close(c.curl_client)
+
+"""
+    public_config = OkexConfig(; base_url = "https://www.okx.com")
+"""
+const public_config = OkexConfig(; base_url = "https://www.okx.com")
 
 """
     OkexAPIError{T} <: AbstractAPIsError
@@ -109,7 +151,7 @@ function CryptoExchangeAPIs.request_sign!(client::OkexClient, query::Q, endpoint
     body::String = isempty(str_query) ? "" : "?" * str_query
     query.timestamp = Dates.now(UTC)
     salt = string(Dates.format(query.timestamp, "yyyy-mm-ddTHH:MM:SS.sss\\Z"), "GET", "/", endpoint, body)
-    query.signature = Base64.base64encode(digest("sha256", client.secret_key, salt))
+    query.signature = Base64.base64encode(digest("sha256", client.config.secret_key, salt))
     return query
 end
 
@@ -131,9 +173,9 @@ function CryptoExchangeAPIs.request_headers(client::OkexClient, query::OkexPriva
     return Pair{String,String}[
         "OK-ACCESS-TIMESTAMP" => Dates.format(query.timestamp, "yyyy-mm-ddTHH:MM:SS.sss\\Z"),
         "Content-Type" => "application/json",
-        "OK-ACCESS-KEY" => client.public_key,
+        "OK-ACCESS-KEY" => client.config.public_key,
         "OK-ACCESS-SIGN" => query.signature,
-        "OK-ACCESS-PASSPHRASE" => client.passphrase,
+        "OK-ACCESS-PASSPHRASE" => client.config.passphrase,
     ]
 end
 

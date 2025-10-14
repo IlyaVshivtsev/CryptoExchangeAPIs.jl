@@ -37,7 +37,7 @@ end
 
 """
     symbols(client::KucoinClient, query::SymbolsQuery)
-    symbols(client::KucoinClient = Kucoin.Spot.public_client; kw...)
+    symbols(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
 
 Request via this endpoint to get detail currency pairs for trading.
 
@@ -46,39 +46,9 @@ Request via this endpoint to get detail currency pairs for trading.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Kucoin
 
-result = Kucoin.Spot.symbols()
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "symbol":"AVA-USDT",
-    "baseCurrency":"AVA",
-    "quoteCurrency":"USDT",
-    "feeCurrency":"USDT",
-    "market":"USDS",
-    "baseMaxSize":1.0e10,
-    "baseIncrement":0.01,
-    "quoteMinSize":0.1,
-    "quoteIncrement":0.0001,
-    "priceIncrement":0.0001,
-    "priceLimitRate":0.1,
-    "minFunds":0.1,
-    "isMarginEnabled":false,
-    "enableTrading":true,
-    "baseMinSize":0.1,
-    "name":"AVA-USDT",
-    "quoteMaxSize":9.9999999e7
-  },
-  ...
-]
+result = Kucoin.API.V2.Symbols.symbols()
 ```
 """
 function symbols(client::KucoinClient, query::SymbolsQuery)
@@ -86,7 +56,7 @@ function symbols(client::KucoinClient, query::SymbolsQuery)
     return APIsRequest{Data{Vector{SymbolsData}}}("GET", end_point, query)(client)
 end
 
-function symbols(client::KucoinClient = Kucoin.public_client; kw...)
+function symbols(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
     return symbols(client, SymbolsQuery(; kw...))
 end
 

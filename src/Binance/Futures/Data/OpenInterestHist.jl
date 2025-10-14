@@ -59,29 +59,12 @@ end
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 result = Binance.Futures.Data.open_interest_hist(;
     symbol = "BTCUSDT",
     period = Binance.Futures.Data.OpenInterestHist.TimeInterval.h1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "symbol":"BTCUSDT",
-    "sumOpenInterest":81737.468,
-    "sumOpenInterestValue":5.730969977716018e9,
-    "timestamp":"2024-03-29T15:00:00"
-  },
-  ...
-]
 ```
 """
 function open_interest_hist(client::BinanceClient, query::OpenInterestHistQuery)

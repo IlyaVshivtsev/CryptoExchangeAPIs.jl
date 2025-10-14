@@ -62,7 +62,7 @@ end
 
 """
     get_candlestick(client::CryptocomClient, query::GetCandlestickQuery)
-    get_candlestick(client::CryptocomClient = Cryptocom.Spot.public_client; kw...)
+    get_candlestick(client::CryptocomClient = Cryptocom.CryptocomClient(Cryptocom.public_config); kw...)
 
 Retrieves candlesticks (k-line data history) over a given period for an instrument.
 
@@ -81,47 +81,22 @@ Retrieves candlesticks (k-line data history) over a given period for an instrume
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Cryptocom
 
-result = Cryptocom.Spot.get_candlestick(;
+result = Cryptocom.Public.get_candlestick(;
     instrument_name = "BTC_USDT",
-    timeframe = Cryptocom.Spot.GetCandlestick.M1,
-) 
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "id":-1,
-  "method":"public/get-candlestick",
-  "code":"0",
-  "result":{
-    "interval":"1M",
-    "data":[
-      {
-        "o":19000.0,
-        "h":22982.05,
-        "l":15492.33,
-        "c":17170.28,
-        "v":150666.07457,
-        "t":"2022-11-01T00:00:00"
-      },
-      ...
-    ],
-    "instrument_name":"BTC_USDT"
-  }
-}
+    timeframe = Cryptocom.Public.GetCandlestick.TimeInterval.M1,
+)
 ```
 """
 function get_candlestick(client::CryptocomClient, query::GetCandlestickQuery)
     return APIsRequest{Data{GetCandlestickData}}("GET", "public/get-candlestick", query)(client)
 end
 
-function get_candlestick(client::CryptocomClient = Cryptocom.public_client; kw...)
+function get_candlestick(
+    client::CryptocomClient = Cryptocom.CryptocomClient(Cryptocom.public_config);
+    kw...,
+)
     return get_candlestick(client, GetCandlestickQuery(; kw...))
 end
 

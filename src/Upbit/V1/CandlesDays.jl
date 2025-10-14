@@ -35,7 +35,7 @@ end
 
 """
     candles_days(client::UpbitClient, query::CandlesDaysQuery)
-    candles_days(client::UpbitClient = Upbit.Spot.public_client; kw...)
+    candles_days(client::UpbitClient = Upbit.UpbitClient(Upbit.public_config); kw...)
 
 Daily candle data.
 
@@ -53,43 +53,21 @@ Daily candle data.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Upbit
 
-result = Upbit.Spot.candles_days(;
+result = Upbit.V1.CandlesDays.candles_days(;
     market = "KRW-BTC"
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "market":"KRW-BTC",
-    "candle_acc_trade_price":2.0574363150768314e11,
-    "candle_acc_trade_volume":2137.74569241,
-    "candle_date_time_kst":"2024-03-25T09:00:00",
-    "candle_date_time_utc":"2024-03-25T00:00:00",
-    "change_price":-419000.0,
-    "change_rate":-0.0043363968,
-    "high_price":9.7e7,
-    "low_price":9.56e7,
-    "opening_price":9.6624e7,
-    "prev_closing_price":9.6624e7,
-    "timestamp":"2024-03-25T10:22:43.660999936",
-    "trade_price":9.6205e7
-  }
-]
 ```
 """
 function candles_days(client::UpbitClient, query::CandlesDaysQuery)
     return APIsRequest{Vector{CandlesDaysData}}("GET", "v1/candles/days", query)(client)
 end
 
-function candles_days(client::UpbitClient = Upbit.public_client; kw...)
+function candles_days(
+    client::UpbitClient = Upbit.UpbitClient(Upbit.public_config);
+    kw...,
+)
     return candles_days(client, CandlesDaysQuery(; kw...))
 end
 

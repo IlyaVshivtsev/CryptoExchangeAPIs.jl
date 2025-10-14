@@ -89,29 +89,6 @@ gateio_client = GateioClient(;
 )
 
 result = Gateio.API.V4.Wallet.deposits(gateio_client)
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "address": "1HkxtBAMrA3tP5EYY2CZortjZvFDH5Cs",
-    "amount": 222.61,
-    "chain": "TRX"
-    "currency": "USDT",
-    "fee": null,
-    "id": 210496,
-    "memo": null,
-    "status": "DONE",
-    "timestamp": "2018-11-12T05:20:00",
-    "txid": 128988928203223323290,
-    "withdraw_order_id": "order_123456",
-  },
-  ...
-]
 ```
 """
 function deposits(client::GateioClient, query::DepositsQuery)

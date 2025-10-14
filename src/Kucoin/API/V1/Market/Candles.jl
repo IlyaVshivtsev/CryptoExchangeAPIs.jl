@@ -49,7 +49,7 @@ end
 
 """
     candles(client::KucoinClient, query::CandlesQuery)
-    candles(client::KucoinClient = Kucoin.Spot.public_client; kw...)
+    candles(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
 
 Request via this endpoint to get the kline of the specified symbol.
 
@@ -67,42 +67,19 @@ Request via this endpoint to get the kline of the specified symbol.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Kucoin
 
-result = Kucoin.Spot.candles(;
+result = Kucoin.API.V1.Market.candles(;
     symbol = "BTC-USDT",
-    type = Kucoin.Spot.Candles.m1,
+    type = Kucoin.API.V1.Market.Candles.TimeInterval.m1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "code":200000,
-  "data":[
-    {
-      "time":"2024-05-14T10:37:00",
-      "open":61665.9,
-      "close":61676.4,
-      "high":61676.4,
-      "low":61660.3,
-      "volume":0.61931855,
-      "turnover":38189.806617378
-    },
-    ...
-  ]
-}
 ```
 """
 function candles(client::KucoinClient, query::CandlesQuery)
     return APIsRequest{Data{Vector{CandlesData}}}("GET", "api/v1/market/candles", query)(client)
 end
 
-function candles(client::KucoinClient = Kucoin.public_client; kw...)
+function candles(client::KucoinClient = Kucoin.KucoinClient(Kucoin.public_config); kw...)
     return candles(client, CandlesQuery(; kw...))
 end
 

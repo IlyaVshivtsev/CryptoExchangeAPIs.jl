@@ -1,8 +1,8 @@
-module WithdrawHistory
+module History
 
-export WithdrawHistoryQuery,
-    WithdrawHistoryData,
-    withdraw_history
+export HistoryQuery,
+    HistoryData,
+    history
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -21,7 +21,7 @@ using CryptoExchangeAPIs: Maybe, APIsRequest
     COMPLETED = 6
 end
 
-Base.@kwdef mutable struct WithdrawHistoryQuery <: BinancePrivateQuery
+Base.@kwdef mutable struct HistoryQuery <: BinancePrivateQuery
     coin::Maybe{String} = nothing
     endTime::Maybe{DateTime} = nothing
     limit::Maybe{Int64} = 1000
@@ -35,11 +35,11 @@ Base.@kwdef mutable struct WithdrawHistoryQuery <: BinancePrivateQuery
     signature::Maybe{String} = nothing
 end
 
-function Serde.SerQuery.ser_type(::Type{<:WithdrawHistoryQuery}, x::WithdrawStatus.T)::Int64
+function Serde.SerQuery.ser_type(::Type{<:HistoryQuery}, x::WithdrawStatus.T)::Int64
     return Int64(x)
 end
 
-struct WithdrawHistoryData <: BinanceData
+struct HistoryData <: BinanceData
     address::String
     amount::Float64
     applyTime::NanoDate
@@ -58,8 +58,8 @@ struct WithdrawHistoryData <: BinanceData
 end
 
 """
-    withdraw_history(client::BinanceClient, query::WithdrawHistoryQuery)
-    withdraw_history(client::BinanceClient; kw...)
+    history(client::BinanceClient, query::HistoryQuery)
+    history(client::BinanceClient; kw...)
 
 Fetch withdraw history.
 
@@ -83,7 +83,6 @@ Fetch withdraw history.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 binance_client = BinanceClient(;
@@ -92,42 +91,15 @@ binance_client = BinanceClient(;
     secret_key = ENV["BINANCE_SECRET_KEY"],
 )
 
-result = Binance.SAPI.V1.Capital.withdraw_history(binance_client)
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "id":"b6ae22b3aa844210a7041aee7589627c",
-    "amount":8.91000000,
-    "transactionFee":0.004,
-    "coin":"USDT",
-    "status":6,
-    "address":"0x94df8b352de7f46f64b01d3666bf6e936e44ce60",
-    "txId":"0xb5ef8c13b968a406cc62a93a8bd80f9e9a906ef1b3fcf20a2e48573c17659268"
-    "applyTime":"2019-10-12T11:12:02",
-    "network":"ETH",
-    "transferType":0,
-    "info":"",
-    "confirmNo":3,
-    "walletType":1,
-    "txKey":"",
-    "completeTime":"2023-03-23T16:52:41"
-  },
-  ...
-]
+result = Binance.SAPI.V1.Capital.Withdraw.history(binance_client)
 ```
 """
-function withdraw_history(client::BinanceClient, query::WithdrawHistoryQuery)
-    return APIsRequest{Vector{WithdrawHistoryData}}("GET", "sapi/v1/capital/withdraw/history", query)(client)
+function history(client::BinanceClient, query::HistoryQuery)
+    return APIsRequest{Vector{HistoryData}}("GET", "sapi/v1/capital/withdraw/history", query)(client)
 end
 
-function withdraw_history(client::BinanceClient; kw...)
-    return withdraw_history(client, WithdrawHistoryQuery(; kw...))
+function history(client::BinanceClient; kw...)
+    return history(client, HistoryQuery(; kw...))
 end
 
 end 

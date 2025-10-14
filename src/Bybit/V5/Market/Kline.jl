@@ -58,7 +58,7 @@ end
 
 """
     kline(client::BybitClient, query::KlineQuery)
-    kline(client::BybitClient = Bybit.Spot.public_client; kw...)
+    kline(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)
 
 [`GET /v5/market/kline`](https://bybit-exchange.github.io/docs/v5/market/kline)
 
@@ -76,50 +76,20 @@ end
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Bybit
 
-result = Bybit.Spot.kline(;
-    category = Bybit.Spot.Kline.SPOT,
+result = Bybit.V5.Market.kline(;
+    category = Bybit.V5.Market.Kline.Category.SPOT,
     symbol = "ADAUSDT",
-    interval = Bybit.Spot.Kline.M1,
+    interval = Bybit.V5.Market.Kline.TimeInterval.M1,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "retCode":0,
-  "retMsg":"OK",
-  "result":{
-    "list":[
-      {
-        "start":"2025-01-01T00:00:00",
-        "open":0.8451,
-        "high":1.1519,
-        "low":0.8382,
-        "close":0.9103,
-        "volume":6.6700225827e8,
-        "turnover":6.724810699166e8
-      },
-      ...
-    ],
-    "nextPageCursor":null,
-    "category":"spot"
-  },
-  "retExtInfo":{},
-  "time":"2025-01-13T11:19:18.851000064"
-}
 ```
 """
 function kline(client::BybitClient, query::KlineQuery)
     return APIsRequest{Data{List{KlineData}}}("GET", "/v5/market/kline", query)(client)
 end
 
-function kline(client::BybitClient = Bybit.public_client; kw...)
+function kline(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)
     return kline(client, KlineQuery(; kw...))
 end
 

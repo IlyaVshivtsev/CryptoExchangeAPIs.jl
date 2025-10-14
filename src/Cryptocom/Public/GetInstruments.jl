@@ -45,7 +45,7 @@ end
 
 """
     get_instruments(client::CryptocomClient, query::GetInstrumentsQuery)
-    get_instruments(client::CryptocomClient = Cryptocom.Spot.public_client; kw...)
+    get_instruments(client::CryptocomClient = Cryptocom.CryptocomClient(Cryptocom.public_config); kw...)
 
 Provides information on all supported instruments.
 
@@ -54,49 +54,19 @@ Provides information on all supported instruments.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Cryptocom
 
-result = Cryptocom.Spot.get_instruments() 
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "id":-1,
-  "method":"public/get-instruments",
-  "code":"0",
-  "result":{
-    "data":[
-      {
-        "symbol":"ZRX_USDT",
-        "base_ccy":"ZRX",
-        "quote_ccy":"USDT",
-        "inst_type":"CCY_PAIR",
-        "display_name":"ZRX/USDT",
-        "quote_decimals":5.0,
-        "quantity_decimals":0.0,
-        "price_tick_size":"0.00001",
-        "qty_tick_size":"1",
-        "max_leverage":"50",
-        "tradable":true,
-        "expiry_timestamp_ms":0,
-        "underlying_symbol":null
-      },
-      ...
-    ]
-  }
-}
+result = Cryptocom.Public.get_instruments()
 ```
 """
 function get_instruments(client::CryptocomClient, query::GetInstrumentsQuery)
     return APIsRequest{Data{GetInstrumentsData}}("GET", "public/get-instruments", query)(client)
 end
 
-function get_instruments(client::CryptocomClient = Cryptocom.public_client; kw...)
+function get_instruments(
+    client::CryptocomClient = Cryptocom.CryptocomClient(Cryptocom.public_config);
+    kw...,
+)
     return get_instruments(client, GetInstrumentsQuery(; kw...))
 end
 

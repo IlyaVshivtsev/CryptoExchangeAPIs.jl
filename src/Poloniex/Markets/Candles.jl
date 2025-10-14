@@ -59,7 +59,7 @@ end
 
 """
     candles(client::PoloniexClient, query::CandlesQuery)
-    candles(client::PoloniexClient = Poloniex.Spot.public_client; kw...)
+    candles(client::PoloniexClient = Poloniex.PoloniexClient(Poloniex.public_config); kw...)
 
 Get latest trade price for all symbols.
 
@@ -78,41 +78,14 @@ Get latest trade price for all symbols.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Poloniex
 
-result = Poloniex.Spot.candles(;
+result = Poloniex.Markets.Candles.candles(;
     symbol = "BTC_USDT",
-    interval = CryptoExchangeAPIs.Poloniex.Spot.Candles.m5,
+    interval = Poloniex.Markets.Candles.TimeInterval.m5,
     startTime = now(UTC) - Minute(100),
     endTime = now(UTC) - Hour(1),
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "low":65575.65,
-    "high":65691.47,
-    "open":65691.47,
-    "close":65646.11,
-    "amount":136992.38,
-    "quantity":2.086813,
-    "buyTakerAmount":70208.28,
-    "buyTakerQuantity":1.069507,
-    "tradeCount":117,
-    "ts":1715873094983,
-    "weightedAverage":65646.71,
-    "interval":"MINUTE_5",
-    "startTime":"2024-05-16T15:20:00",
-    "closeTime":"2024-05-16T15:24:59.999000064"
-  },
-  ...
-]
 ```
 """
 function candles(client::PoloniexClient, query::CandlesQuery; kw...)
@@ -120,7 +93,10 @@ function candles(client::PoloniexClient, query::CandlesQuery; kw...)
     return APIsRequest{Vector{CandlesData}}("GET", endpoint, query)(client)
 end
 
-function candles(client::PoloniexClient = Poloniex.public_client; kw...)
+function candles(
+    client::PoloniexClient = Poloniex.PoloniexClient(Poloniex.public_config);
+    kw...,
+)
     return candles(client, CandlesQuery(; kw...))
 end
 

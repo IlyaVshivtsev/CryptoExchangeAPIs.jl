@@ -61,7 +61,7 @@ end
 
 """
     instruments_info(client::BybitClient, query::InstrumentsInfoQuery)
-    instruments_info(client::BybitClient = Bybit.Spot.public_client; kw...)
+    instruments_info(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)
 
 Query for the instrument specification of online trading pairs.
 
@@ -81,61 +81,19 @@ Query for the instrument specification of online trading pairs.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Bybit
 
-result = Bybit.Spot.instruments_info(;
-    category = Bybit.Spot.InstrumentsInfo.SPOT,
+result = Bybit.V5.Market.instruments_info(;
+    category = Bybit.V5.Market.InstrumentsInfo.Category.SPOT,
     symbol = "BTCUSDT",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "retCode":0,
-  "retMsg":"OK",
-  "result":{
-    "list":[
-      {
-        "symbol":"BTCUSDT",
-        "baseCoin":"BTC",
-        "quoteCoin":"USDT",
-        "innovation":0,
-        "status":"Trading",
-        "lotSizeFilter":{
-          "basePrecision":1.0e-6,
-          "quotePrecision":1.0e-8,
-          "minOrderQty":4.8e-5,
-          "maxOrderQty":83.0,
-          "minOrderAmt":1.0,
-          "maxOrderAmt":8.0e6
-        },
-        "priceFilter":{
-          "tickSize":0.01
-        },
-        "riskParameters":{
-          "limitParameter":0.02,
-          "marketParameter":0.02
-        }
-      }
-    ],
-    "nextPageCursor":null,
-    "category":"spot"
-  },
-  "retExtInfo":{},
-  "time":"2025-01-13T12:00:59.132"
-}
 ```
 """
 function instruments_info(client::BybitClient, query::InstrumentsInfoQuery)
     return APIsRequest{Data{List{InstrumentsInfoData}}}("GET", "/v5/market/instruments-info", query)(client)
 end
 
-function instruments_info(client::BybitClient = Bybit.public_client; kw...)
+function instruments_info(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)
     return instruments_info(client, InstrumentsInfoQuery(; kw...))
 end
 

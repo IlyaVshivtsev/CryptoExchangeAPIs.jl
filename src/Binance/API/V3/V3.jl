@@ -1,5 +1,8 @@
 module V3
 
+include("AvgPrice.jl")
+using .AvgPrice
+
 include("Depth.jl")
 using .Depth
 
@@ -14,5 +17,9 @@ using .MyTrades
 
 include("Ticker24hr.jl")
 using .Ticker24hr
+
+include("Time.jl")
+using .Time
+import .Time: time
 
 end

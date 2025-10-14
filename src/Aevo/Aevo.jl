@@ -8,10 +8,16 @@ export AevoCommonQuery,
     AevoData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type AevoData <: AbstractAPIsData end
 abstract type AevoCommonQuery  <: AbstractAPIsQuery end
@@ -19,9 +25,9 @@ abstract type AevoPublicQuery  <: AevoCommonQuery end
 abstract type AevoAccessQuery  <: AevoCommonQuery end
 
 """
-AevoClient <: AbstractAPIsClient
+    AevoConfig <: AbstractAPIsConfig
 
-Client info.
+Aevo client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client. 
@@ -34,7 +40,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct AevoClient <: AbstractAPIsClient
+Base.@kwdef struct AevoConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -45,9 +51,45 @@ Base.@kwdef struct AevoClient <: AbstractAPIsClient
 end
 
 """
-    public_client = AevoClient(; base_url = "https://api.aevo.xyz")
+    AevoClient <: AbstractAPIsClient
+
+Client for interacting with Aevo exchange API.
+
+## Fields
+- `config::AevoConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = AevoClient(; base_url = "https://api.aevo.xyz")
+mutable struct AevoClient <: AbstractAPIsClient
+    config::AevoConfig
+    curl_client::CurlClient
+
+    function AevoClient(config::AevoConfig)
+        new(config, CurlClient())
+    end
+
+    function AevoClient(; kw...)
+        return AevoClient(AevoConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::AevoClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::AevoClient) = isopen(c.curl_client)
+
+"""
+    close(client::AevoClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::AevoClient) = close(c.curl_client)
+
+"""
+    public_config = AevoConfig(; base_url = "https://api.aevo.xyz")
+"""
+const public_config = AevoConfig(; base_url = "https://api.aevo.xyz")
 
 """
     AevoAPIError{T} <: AbstractAPIsError

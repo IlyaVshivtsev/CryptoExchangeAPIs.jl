@@ -40,7 +40,7 @@ end
 
 """
     book(client::BitfinexClient, query::BookQuery)
-    book(client::BitfinexClient = Bitfinex.public_client; kw...)
+    book(client::BitfinexClient = Bitfinex.BitfinexClient(Bitfinex.public_config); kw...)
 
 The Public Books endpoint allows you to keep track of the state of Bitfinex order books on a price aggregated basis with customizable precision.
 Raw books can be retrieved by using precision `R0`.
@@ -58,7 +58,6 @@ Raw books can be retrieved by using precision `R0`.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Bitfinex
 
 result = Bitfinex.V2.book(;
@@ -66,28 +65,16 @@ result = Bitfinex.V2.book(;
     precision = Bitfinex.V2.Book.Precision.P1,
     len = Bitfinex.V2.Book.BookLength.TWENTY_FIVE,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "price":67070.0,
-    "count":4,
-    "amount":0.16776825
-  },
-  ...
-]
 ```
 """
 function book(client::BitfinexClient, query::BookQuery)
     return APIsRequest{Vector{BookData}}("GET", "v2/book/$(query.symbol)/$(query.precision)", query)(client)
 end
 
-function book(client::BitfinexClient = Bitfinex.public_client; kw...)
+function book(
+    client::BitfinexClient = Bitfinex.BitfinexClient(Bitfinex.public_config);
+    kw...,
+)
     return book(client, BookQuery(; kw...))
 end
 

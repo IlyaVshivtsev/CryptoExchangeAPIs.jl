@@ -53,34 +53,11 @@ Get details of a specifc currency pair.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Spot.currency_pair(; 
     currency_pair = "ETH_BTC",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "id":"ETH_BTC",
-  "base":"ETH",
-  "quote":"BTC",
-  "fee":0.2,
-  "min_base_amount":0.001,
-  "min_quote_amount":1.0e-5,
-  "max_base_amount":1000.0,
-  "max_quote_amount":100.0,
-  "amount_precision":4,
-  "precision":6,
-  "trade_status":"tradable",
-  "sell_start":"1970-01-01T00:00:00",
-  "buy_start":"2016-03-09T00:00:00"
-}
 ```
 """
 function currency_pair(client::GateioClient, query::CurrencyPairQuery)
@@ -88,13 +65,16 @@ function currency_pair(client::GateioClient, query::CurrencyPairQuery)
     return APIsRequest{CurrencyPairData}("GET", end_piont, query)(client)
 end
 
-function currency_pair(client::GateioClient = Gateio.public_client; kw...)
+function currency_pair(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return currency_pair(client, CurrencyPairQuery(; kw...))
 end
 
 """
     currency_pairs(client::GateioClient, query::CurrencyPairsQuery)
-    currency_pairs(client::GateioClient = Gateio.public_client; kw...)
+    currency_pairs(client::GateioClient = Gateio.GateioClient(Gateio.public_config); kw...)
 
 List all currency pairs supported.
 
@@ -103,35 +83,9 @@ List all currency pairs supported.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Spot.currency_pairs()
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "id":"0DOG_USDT",
-    "base":"0DOG",
-    "quote":"USDT",
-    "fee":0.2,
-    "min_base_amount":0.01,
-    "min_quote_amount":3.0,
-    "max_base_amount":null,
-    "max_quote_amount":5.0e6,
-    "amount_precision":2,
-    "precision":5,
-    "trade_status":"tradable",
-    "sell_start":"2020-12-07T04:00:00",
-    "buy_start":"2024-08-21T11:00:00"
-  },
-  ...
-]
 ```
 """
 function currency_pairs(client::GateioClient, query::CurrencyPairsQuery)
@@ -139,7 +93,10 @@ function currency_pairs(client::GateioClient, query::CurrencyPairsQuery)
     return APIsRequest{Vector{CurrencyPairData}}("GET", end_piont, query)(client)
 end
 
-function currency_pairs(client::GateioClient = Gateio.public_client; kw...)
+function currency_pairs(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return currency_pairs(client, CurrencyPairsQuery(; kw...))
 end
 

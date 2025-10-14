@@ -45,7 +45,6 @@ Gets the fee estimate for the crypto withdrawal to crypto address.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Coinbase
 
 coinbase_client = CoinbaseClient(;
@@ -56,17 +55,6 @@ coinbase_client = CoinbaseClient(;
 )
 
 result = Coinbase.Withdrawals.fee_estimate(coinbase_client)
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "fee":0.1,
-  "fee_before_subsidy":0.01
-}
 ```
 """
 function fee_estimate(client::CoinbaseClient, query::FeeEstimateQuery)

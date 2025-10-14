@@ -36,7 +36,7 @@ end
 
 """
     market_all(client::UpbitClient, query::MarketAllQuery)
-    market_all(client::UpbitClient = Upbit.Spot.public_client; kw...)
+    market_all(client::UpbitClient = Upbit.UpbitClient(Upbit.public_config); kw...)
 
 Listing Market List
 
@@ -51,42 +51,19 @@ Listing Market List
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Upbit
 
-result = Upbit.Spot.market_all()
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "market":"KRW-BTC",
-    "english_name":"Bitcoin",
-    "korean_name":"비트코인",
-    "market_event":{
-      "warning":false,
-      "caution":{
-        "PRICE_FLUCTUATIONS":false,
-        "TRADING_VOLUME_SOARING":false,
-        "DEPOSIT_AMOUNT_SOARING":false,
-        "GLOBAL_PRICE_DIFFERENCES":false,
-        "CONCENTRATION_OF_SMALL_ACCOUNTS":false
-      }
-    }
-  },
-  ...
-]
+result = Upbit.V1.MarketAll.market_all()
 ```
 """
 function market_all(client::UpbitClient, query::MarketAllQuery)
     return APIsRequest{Vector{MarketAllData}}("GET", "v1/market/all", query)(client)
 end
 
-function market_all(client::UpbitClient = Upbit.public_client; kw...)
+function market_all(
+    client::UpbitClient = Upbit.UpbitClient(Upbit.public_config);
+    kw...,
+)
     return market_all(client, MarketAllQuery(; kw...))
 end
 

@@ -42,7 +42,7 @@ end
 
 """
     candles(client::CoinbaseClient, query::CandlesQuery)
-    candles(client::CoinbaseClient = Coinbase.public_client; kw...)
+    candles(client::CoinbaseClient = Coinbase.CoinbaseClient(Coinbase.public_config); kw...)
 
 Get rates for a single product by product ID, grouped in buckets.
 
@@ -60,38 +60,22 @@ Get rates for a single product by product ID, grouped in buckets.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Coinbase
 
 result = Coinbase.Products.candles(;
     granularity = Coinbase.Products.Candles.TimeInterval.d1,
     product_id = "BTC-USD",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "time":"2024-03-21T00:00:00",
-    "low":0.617,
-    "high":0.648,
-    "open":0.637,
-    "close":0.632,
-    "volume":417732.13
-  },
-  ...
-]
 ```
 """
-function candles(client::CoinbaseClient, query::CandlesQuery;)
+function candles(client::CoinbaseClient, query::CandlesQuery)
     return APIsRequest{Vector{CandlesData}}("GET", "products/$(query.product_id)/candles", query)(client)
 end
 
-function candles(client::CoinbaseClient = Coinbase.public_client; kw...)
+function candles(
+    client::CoinbaseClient = Coinbase.CoinbaseClient(Coinbase.public_config);
+    kw...,
+)
     return candles(client, CandlesQuery(; kw...))
 end
 

@@ -64,7 +64,6 @@ Get trades for a specific account and symbol.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 binance_client = BinanceClient(;
@@ -77,31 +76,6 @@ result = Binance.API.V3.my_trades(
     binance_client;
     symbol = "BTCUSDT",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "symbol":"BNBBTC",
-    "id":28457,
-    "orderId":100234,
-    "orderListId":-1,
-    "price":4.00000100,
-    "qty":12.00000000,
-    "quoteQty":48.000012,
-    "commission":10.10000000,
-    "commissionAsset":"BNB",
-    "time":"2017-07-12T13:19:09",
-    "isBuyer":true,
-    "isMaker":false,
-    "isBestMatch":true
-  },
-  ...
-]
 ```
 """
 function my_trades(client::BinanceClient, query::MyTradesQuery)

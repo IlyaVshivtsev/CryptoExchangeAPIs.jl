@@ -29,7 +29,7 @@ Serde.isempty(::Type{CurrenciesData}, x::AbstractString) = isempty(x)
 
 """
     currencies(client::GateioClient, query::CurrenciesQuery)
-    currencies(client::GateioClient = Gateio.public_client; kw...)
+    currencies(client::GateioClient = Gateio.GateioClient(Gateio.public_config); kw...)
 
 List all currencies' details.
 
@@ -38,37 +38,19 @@ List all currencies' details.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Spot.currencies()
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "chain":"BSC",
-    "currency":"100X",
-    "delisted":false,
-    "deposit_disabled":true,
-    "fixed_rate":null,
-    "trade_disabled":true,
-    "withdraw_delayed":false,
-    "withdraw_disabled":false
-  },
-  ...
-]
 ```
 """
 function currencies(client::GateioClient, query::CurrenciesQuery)
     return APIsRequest{Vector{CurrenciesData}}("GET", "api/v4/spot/currencies", query)(client)
 end
 
-function currencies(client::GateioClient = Gateio.public_client; kw...)
+function currencies(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return currencies(client, CurrenciesQuery(; kw...))
 end
 

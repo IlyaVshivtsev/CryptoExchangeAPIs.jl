@@ -75,7 +75,7 @@ end
 
 """
     candlesticks(client::GateioClient, query::CandlesticksQuery)
-    candlesticks(client::GateioClient = Gateio.public_client; kw...)
+    candlesticks(client::GateioClient = Gateio.GateioClient(Gateio.public_config); kw...)
 
 Get futures candlesticks.
 
@@ -95,7 +95,6 @@ Get futures candlesticks.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Futures.candlesticks(; 
@@ -104,32 +103,16 @@ result = Gateio.API.V4.Futures.candlesticks(;
     settle = Gateio.API.V4.Futures.Candlesticks.Settle.usdt,
     interval = Gateio.API.V4.Futures.Candlesticks.TimeInterval.d30,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "t":"2024-03-01T00:00:00",
-    "v":5932942626,
-    "c":71360.4,
-    "h":73879.3,
-    "l":59059.0,
-    "o":62415.7,
-    "sum":4.003183751397624e10
-  },
-  ...
-]
 ```
 """
 function candlesticks(client::GateioClient, query::CandlesticksQuery)
     return APIsRequest{Vector{CandlesticksData}}("GET", "api/v4/futures/$(query.settle)/candlesticks", query)(client)
 end
 
-function candlesticks(client::GateioClient = Gateio.public_client; kw...)
+function candlesticks(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return candlesticks(client, CandlesticksQuery(; kw...))
 end
 

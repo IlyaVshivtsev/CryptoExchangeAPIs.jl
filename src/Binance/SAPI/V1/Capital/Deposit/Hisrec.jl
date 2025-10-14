@@ -1,8 +1,8 @@
-module DepositHisrec
+module Hisrec
 
-export DepositHisrecQuery,
-    DepositHisrecData,
-    deposit_hisrec
+export HisrecQuery,
+    HisrecData,
+    hisrec
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -19,7 +19,7 @@ using CryptoExchangeAPIs: Maybe, APIsRequest
     WAITING_USER_CONFIRM = 8
 end
 
-Base.@kwdef mutable struct DepositHisrecQuery <: BinancePrivateQuery
+Base.@kwdef mutable struct HisrecQuery <: BinancePrivateQuery
     coin::Maybe{String} = nothing
     endTime::Maybe{DateTime} = nothing
     limit::Maybe{Int64} = 1000
@@ -33,11 +33,11 @@ Base.@kwdef mutable struct DepositHisrecQuery <: BinancePrivateQuery
     signature::Maybe{String} = nothing
 end
 
-function Serde.SerQuery.ser_type(::Type{<:DepositHisrecQuery}, x::DepositStatus.T)::Int64
+function Serde.SerQuery.ser_type(::Type{<:HisrecQuery}, x::DepositStatus.T)::Int64
     return Int64(x)
 end
 
-struct DepositHisrecData <: BinanceData
+struct HisrecData <: BinanceData
     address::String
     addressTag::String
     amount::Float64
@@ -54,8 +54,8 @@ struct DepositHisrecData <: BinanceData
 end
 
 """
-    deposit_hisrec(client::BinanceClient, query::DepositHisrecQuery)
-    deposit_hisrec(client::BinanceClient; kw...)
+    hisrec(client::BinanceClient, query::HisrecQuery)
+    hisrec(client::BinanceClient; kw...)
 
 Fetch deposit history.
 
@@ -79,7 +79,6 @@ Fetch deposit history.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 binance_client = BinanceClient(;
@@ -88,40 +87,15 @@ binance_client = BinanceClient(;
     secret_key = ENV["BINANCE_SECRET_KEY"],
 )
 
-result = Binance.SAPI.V1.Capital.deposit_hisrec(binance_client)
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "id":769800519366885376,
-    "amount":0.001,
-    "coin":"BNB",
-    "network":"BNB",
-    "status":0,
-    "address":"bnb136ns6lfw4zs5hg4n85vdthaad7hq5m4gtkgf23",
-    "addressTag":"101764890",
-    "txId":"98A3EA560C6B3336D348B6C83F0F95ECE4F1F5919E94BD006E5BF3BF264FACFC",
-    "insertTime":"2022-08-26T05:52:26",
-    "transferType":0,
-    "confirmTimes":"1/1",
-    "unlockConfirm":0,
-    "walletType":0
-  },
-  ...
-]
+result = Binance.SAPI.V1.Capital.Deposit.hisrec(binance_client)
 ```
 """
-function deposit_hisrec(client::BinanceClient, query::DepositHisrecQuery)
-    return APIsRequest{Vector{DepositHisrecData}}("GET", "sapi/v1/capital/deposit/hisrec", query)(client)
+function hisrec(client::BinanceClient, query::HisrecQuery)
+    return APIsRequest{Vector{HisrecData}}("GET", "sapi/v1/capital/deposit/hisrec", query)(client)
 end
 
-function deposit_hisrec(client::BinanceClient; kw...)
-    return deposit_hisrec(client, DepositHisrecQuery(; kw...))
+function hisrec(client::BinanceClient; kw...)
+    return hisrec(client, HisrecQuery(; kw...))
 end
 
 end

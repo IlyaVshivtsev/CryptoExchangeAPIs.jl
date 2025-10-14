@@ -65,7 +65,7 @@ end
 
 """
     instruments(client::OkexClient, query::InstrumentsQuery)
-    instruments(client::OkexClient = Okex.Common.public_client; kw...)
+    instruments(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
 
 Retrieve a list of instruments with open contracts.
 
@@ -85,63 +85,18 @@ Retrieve a list of instruments with open contracts.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Okex
 
-result = Okex.Common.instruments(;
-    instType = Okex.Common.Instruments.SPOT,
+result = Okex.API.V5.Public.instruments(;
+    instType = Okex.API.V5.Public.Instruments.InstType.SPOT,
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "msg":"",
-  "code":0,
-  "data":[
-    {
-      "instId":"BTC-AUD",
-      "baseCcy":"BTC",
-      "quoteCcy":"AUD",
-      "ctMult":null,
-      "ctType":null,
-      "ctVal":null,
-      "ctValCcy":null,
-      "expTime":null,
-      "instFamily":null,
-      "instType":"SPOT",
-      "lever":null,
-      "listTime":"2024-08-16T01:21:44",
-      "lotSz":1.0e-7,
-      "maxIcebergSz":9.9999999999e10,
-      "maxLmtAmt":2.0e7,
-      "maxLmtSz":99999999999,
-      "maxMktAmt":1.0e6,
-      "maxMktSz":1000000,
-      "maxStopSz":1000000,
-      "maxTriggerSz":9.9999999999e10,
-      "maxTwapSz":9.9999999999e10,
-      "minSz":0.0001,
-      "optType":null,
-      "settleCcy":null,
-      "state":"live",
-      "ruleType":"normal",
-      "stk":null,
-      "tickSz":0.1,
-      "uly":null
-    },
-    ...
-}
 ```
 """
 function instruments(client::OkexClient, query::InstrumentsQuery)
     return APIsRequest{Data{InstrumentsData}}("GET", "api/v5/public/instruments", query)(client)
 end
 
-function instruments(client::OkexClient = Okex.public_client; kw...)
+function instruments(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
     return instruments(client, InstrumentsQuery(; kw...))
 end
 

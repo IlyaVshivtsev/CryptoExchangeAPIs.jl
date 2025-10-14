@@ -35,7 +35,7 @@ end
 
 """
     ticker(client::KrakenClient, query::TickerQuery)
-    ticker(client::KrakenClient = Kraken.Spot.public_client; kw...)
+    ticker(client::KrakenClient = Kraken.KrakenClient(Kraken.public_config); kw...)
 
 Get ticker information for all or requested markets.
 
@@ -50,68 +50,18 @@ Get ticker information for all or requested markets.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Kraken
 
-result = Kraken.Spot.ticker(;
-    air = "XBTUSD",
+result = Kraken.V0.Public.ticker(;
+    pair = "XBTUSD",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "error":[],
-  "result":{
-    "XXBTZUSD":{
-      "a":{
-        "price":64847.8,
-        "whole_lot_volume":6.0,
-        "lot_volume":6.0
-      },
-      "b":{
-        "price":64847.7,
-        "whole_lot_volume":1.0,
-        "lot_volume":1.0
-      },
-      "c":[
-        64847.8,
-        0.00011635
-      ],
-      "v":[
-        2575.41519714,
-        3075.93450804
-      ],
-      "p":[
-        63743.49996,
-        63382.82681
-      ],
-      "t":[
-        28103,
-        34075
-      ],
-      "l":[
-        61325.4,
-        61150.0
-      ],
-      "h":[
-        65108.9,
-        65108.9
-      ],
-      "o":61568.6
-    }
-  }
-}
 ```
 """
 function ticker(client::KrakenClient, query::TickerQuery)
     return APIsRequest{Data{Dict{String,TickerData}}}("GET", "0/public/Ticker", query)(client)
 end
 
-function ticker(client::KrakenClient = Kraken.public_client; kw...)
+function ticker(client::KrakenClient = Kraken.KrakenClient(Kraken.public_config); kw...)
     return ticker(client, TickerQuery(; kw...))
 end
 

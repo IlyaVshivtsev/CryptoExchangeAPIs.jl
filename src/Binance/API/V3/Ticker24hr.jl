@@ -63,42 +63,11 @@ end
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 result = Binance.API.V3.ticker24hr(;
     symbol = "ADAUSDT",
-) 
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "symbol":"ADAUSDT",
-  "askPrice":0.631,
-  "askQty":53.4,
-  "bidPrice":0.6309,
-  "bidQty":23714.9,
-  "closeTime":"2024-03-21T14:04:37.151000064",
-  "count":265067,
-  "firstId":482014355,
-  "highPrice":0.6459,
-  "lastId":482279421,
-  "lastPrice":0.631,
-  "lastQty":1282.0,
-  "lowPrice":0.5757,
-  "openPrice":0.6048,
-  "openTime":"2024-03-20T14:04:37.151000064",
-  "prevClosePrice":0.6048,
-  "priceChange":0.0262,
-  "priceChangePercent":4.332,
-  "quoteVolume":1.363472992331e8,
-  "volume":2.185537682e8,
-  "weightedAvgPrice":0.62386158
-}
+)
 ```
 """
 function ticker24hr(client::BinanceClient, query::Ticker24hrQuery)

@@ -57,7 +57,7 @@ struct GetInstrumentsData <: DeribitData
     min_trade_amount::Maybe{Float64}
     option_type::Maybe{OptionType}
     price_index::Maybe{String}
-    rfq::Bool
+    rfq::Maybe{Bool}
     settlement_currency::Maybe{String}
     settlement_period::Maybe{String}
     strike::Maybe{Float64}
@@ -67,7 +67,7 @@ end
 
 """
     get_instruments(client::DeribitClient, query::InstrumentQuery)
-    get_instruments(client::DeribitClient = Deribit.Common.public_client; kw...)
+    get_instruments(client::DeribitClient = Deribit.DeribitClient(Deribit.public_config); kw...)
 
 Retrieves available trading instruments. This method can be used to see which instruments are available for trading, or which instruments have recently expired.
 
@@ -85,68 +85,21 @@ Retrieves available trading instruments. This method can be used to see which in
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Deribit
 
-result = Deribit.Common.get_instruments(;
-    currency = Deribit.Common.Instrument.BTC
+result = Deribit.API.V2.Public.get_instruments(;
+    currency = Deribit.API.V2.Public.GetInstruments.Currency.BTC
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-
-{
-  "id":null,
-  "jsonrpc":"2.0",
-  "testnet":false,
-  "usDiff":1746,
-  "usOut":"2024-05-17T11:57:46.222272",
-  "usIn":"2024-05-17T11:57:46.220526080",
-  "result":[
-    {
-      "instrument_name":"BTC-18MAY24-55000-C",
-      "base_currency":"BTC",
-      "quote_currency":"BTC",
-      "block_trade_commission":0.0003,
-      "block_trade_min_trade_amount":25.0,
-      "block_trade_tick_size":0.0001,
-      "contract_size":1.0,
-      "counter_currency":"USD",
-      "creation_timestamp":"2024-05-15T08:00:13",
-      "expiration_timestamp":"2024-05-18T08:00:00",
-      "future_type":null,
-      "instrument_id":326799,
-      "instrument_type":"reversed",
-      "is_active":true,
-      "kind":"option",
-      "maker_commission":0.0003,
-      "max_leverage":null,
-      "max_liquidation_commission":null,
-      "min_trade_amount":0.1,
-      "option_type":"call",
-      "price_index":"btc_usd",
-      "rfq":false,
-      "settlement_currency":"BTC",
-      "settlement_period":"day",
-      "strike":55000.0,
-      "taker_commission":0.0003,
-      "tick_size":0.0001
-    },
-    ...
-  ]
-}
-
 ```
 """
 function get_instruments(client::DeribitClient, query::GetInstrumentsQuery)
     return APIsRequest{Data{Vector{GetInstrumentsData}}}("GET", "api/v2/public/get_instruments", query)(client)
 end
 
-function get_instruments(client::DeribitClient = Deribit.public_client; kw...)
+function get_instruments(
+    client::DeribitClient = Deribit.DeribitClient(Deribit.public_config);
+    kw...,
+)
     return get_instruments(client, GetInstrumentsQuery(; kw...))
 end
 

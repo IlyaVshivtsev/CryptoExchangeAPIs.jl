@@ -46,7 +46,7 @@ end
 
 """
     symbols(client::PoloniexClient, query::SymbolsQuery)
-    symbols(client::PoloniexClient = Poloniex.Spot.public_client; kw...)
+    symbols(client::PoloniexClient = Poloniex.PoloniexClient(Poloniex.public_config); kw...)
 
 Get all symbols and their tradeLimit info.
 
@@ -61,44 +61,11 @@ Get all symbols and their tradeLimit info.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Poloniex
 
-result = Poloniex.Spot.market(;
+result = Poloniex.Markets.Symbols.symbols(;
     symbol = "BTC_USDT",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "symbol":"BTC_USDT",
-    "baseCurrencyName":"BTC",
-    "quoteCurrencyName":"USDT",
-    "displayName":"BTC/USDT",
-    "state":"NORMAL",
-    "visibleStartTime":"2022-07-28T14:33:39.512",
-    "tradableStartTime":"2022-07-28T14:33:39.512",
-    "symbolTradeLimit":{
-      "symbol":"BTC_USDT",
-      "amountScale":2,
-      "highestBid":0.0,
-      "lowestAsk":0.0,
-      "minAmount":1.0,
-      "minQuantity":1.0e-6,
-      "priceScale":2,
-      "quantityScale":6
-    },
-        "crossMargin":{
-      "maxLeverage":3,
-      "supportCrossMargin":true
-    }
-  }
-]
 ```
 """
 function symbols(client::PoloniexClient, query::SymbolsQuery; kw...)
@@ -106,7 +73,10 @@ function symbols(client::PoloniexClient, query::SymbolsQuery; kw...)
     return APIsRequest{Vector{SymbolsData}}("GET", endpoint, query)(client)
 end
 
-function symbols(client::PoloniexClient = Poloniex.public_client; kw...)
+function symbols(
+    client::PoloniexClient = Poloniex.PoloniexClient(Poloniex.public_config);
+    kw...,
+)
     return symbols(client, SymbolsQuery(; kw...))
 end
 

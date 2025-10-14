@@ -75,36 +75,12 @@ Wrapper for method: [`GET fapi/v3/klines`](https://binance-docs.github.io/apidoc
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Binance
 
 result = Binance.FAPI.V1.klines(;
     symbol = "ADAUSDT",
     interval = Binance.FAPI.V1.Klines.TimeInterval.M1,
-) 
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "openTime":"2020-01-01T00:00:00",
-    "openPrice":0.0545,
-    "highPrice":0.05559,
-    "lowPrice":0.05209,
-    "closePrice":0.05387,
-    "volume":2.44632854e8,
-    "closeTime":"2020-01-31T23:59:59.999000064",
-    "quoteAssetVolume":1.313060288191e7,
-    "tradesNumber":40186,
-    "takerBuyBaseAssetVolume":1.16954492e8,
-    "takerBuyQuoteAssetVolume":6.28735588554e6
-  },
-  ...
-]
+)
 ```
 """
 function klines(client::BinanceClient, query::KlinesQuery)

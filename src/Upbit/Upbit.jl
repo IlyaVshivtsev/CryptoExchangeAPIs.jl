@@ -9,11 +9,17 @@ export UpbitCommonQuery,
     UpbitData
 
 using Serde
-using Dates, NanoDates, Base64, Nettle
+using Dates, NanoDates, Base64, Nettle, EasyCurl
 using UUIDs, JSONWebTokens
 
 using ..CryptoExchangeAPIs
-using ..CryptoExchangeAPIs: Maybe,  AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type UpbitData <: AbstractAPIsData end
 abstract type UpbitCommonQuery <: AbstractAPIsQuery end
@@ -22,9 +28,9 @@ abstract type UpbitAccessQuery <: UpbitCommonQuery end
 abstract type UpbitPrivateQuery <: UpbitCommonQuery end
 
 """
-    UpbitClient <: AbstractAPIsClient
+    UpbitConfig <: AbstractAPIsConfig
 
-Client info.
+Upbit client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -37,7 +43,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct UpbitClient <: AbstractAPIsClient
+Base.@kwdef struct UpbitConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -48,9 +54,45 @@ Base.@kwdef struct UpbitClient <: AbstractAPIsClient
 end
 
 """
-    public_client = UpbitClient(; base_url = "https://api.upbit.com")
+    UpbitClient <: AbstractAPIsClient
+
+Client for interacting with Upbit exchange API.
+
+## Fields
+- `config::UpbitConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = UpbitClient(; base_url = "https://api.upbit.com")
+mutable struct UpbitClient <: AbstractAPIsClient
+    config::UpbitConfig
+    curl_client::CurlClient
+
+    function UpbitClient(config::UpbitConfig)
+        new(config, CurlClient())
+    end
+
+    function UpbitClient(; kw...)
+        return UpbitClient(UpbitConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::UpbitClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::UpbitClient) = isopen(c.curl_client)
+
+"""
+    close(client::UpbitClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::UpbitClient) = close(c.curl_client)
+
+"""
+    public_config = UpbitConfig(; base_url = "https://api.upbit.com")
+"""
+const public_config = UpbitConfig(; base_url = "https://api.upbit.com")
 
 struct UpbitAPIsErrorMsg
     name::Int64
@@ -95,7 +137,7 @@ end
 function CryptoExchangeAPIs.request_sign!(client::UpbitClient, query::Q, ::String)::Q where {Q<:UpbitPrivateQuery}
     query.signature = nothing
     body = Dict{String,String}(
-        "access_key" => client.public_key,
+        "access_key" => client.config.public_key,
         "nonce" => string(UUIDs.uuid1()),
     )
     qstr = Serde.to_query(query)
@@ -105,7 +147,7 @@ function CryptoExchangeAPIs.request_sign!(client::UpbitClient, query::Q, ::Strin
             "query_hash_alg" => "SHA512",
         ))
     end
-    hs512 = JSONWebTokens.HS512(client.secret_key)
+    hs512 = JSONWebTokens.HS512(client.config.secret_key)
     token = JSONWebTokens.encode(hs512, body)
     query.signature = "Bearer $token"
     return query
@@ -121,7 +163,7 @@ end
 
 function CryptoExchangeAPIs.request_headers(client::UpbitClient, ::UpbitPublicQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "Content-Type" => "application/json"
+        "Content-Type" => "application/json",
     ]
 end
 

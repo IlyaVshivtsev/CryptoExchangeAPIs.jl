@@ -38,7 +38,7 @@ end
 
 """
     symbols(client::HuobiClient, query::SymbolsQuery)
-    symbols(client::HuobiClient = Huobi.Spot.public_client; kw...)
+    symbols(client::HuobiClient = Huobi.HuobiClient(Huobi.public_config); kw...)
 
 Get all Supported Trading Symbol.
 
@@ -51,53 +51,16 @@ Get all Supported Trading Symbol.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Huobi
 
-result = Huobi.Spot.symbols()
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "status":"ok",
-  "ch":null,
-  "ts":"2024-09-26T13:42:55.368999936",
-  "code":null,
-  "data":[
-    {
-      "symbol":"letusdt",
-      "bcdn":"LET",
-      "qcdn":"USDT",
-      "bc":"let",
-      "qc":"usdt",
-      "state":"offline",
-      "cd":false,
-      "te":false,
-      "toa":"2018-01-01T04:00:00",
-      "sp":"st",
-      "w":950000000,
-      "ttp":8.0,
-      "tap":4.0,
-      "tpp":6.0,
-      "fp":8.0,
-      "tags":"",
-      "d":null,
-      "elr":null
-    },
-    ...
-  ]
-}
+result = Huobi.V1.Settings.Common.symbols()
 ```
 """
 function symbols(client::HuobiClient, query::SymbolsQuery)
     return APIsRequest{Data{Vector{SymbolsData}}}("GET", "v1/settings/common/symbols", query)(client)
 end
 
-function symbols(client::HuobiClient = Huobi.public_client; kw...)
+function symbols(client::HuobiClient = Huobi.HuobiClient(Huobi.public_config); kw...)
     return symbols(client, SymbolsQuery(; kw...))
 end
 

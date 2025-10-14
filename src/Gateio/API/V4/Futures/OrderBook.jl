@@ -42,7 +42,7 @@ end
 
 """
     order_book(client::GateioClient, query::OrderBookQuery)
-    order_book(client::GateioClient = Gateio.public_client; kw...)
+    order_book(client::GateioClient = Gateio.GateioClient(Gateio.public_config); kw...)
 
 Futures order book.
 
@@ -61,46 +61,22 @@ Futures order book.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Futures.order_book(; 
     settle = Gateio.API.V4.Futures.OrderBook.Settle.usdt,
     contract = "BTC_USDT",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-{
-  "id":null,
-  "current":1.713214908609e9,
-  "update":1.713214908589e9,
-  "asks":[
-    {
-      "p":"63167.4",
-      "s":1903
-    },
-    ...
-  ],
-  "bids":[
-    {
-      "p":"63167.3",
-      "s":10650
-    },
-    ...
-  ]
-}
 ```
 """
 function order_book(client::GateioClient, query::OrderBookQuery)
     return APIsRequest{OrderBookData}("GET", "api/v4/futures/$(query.settle)/order_book", query)(client)
 end
 
-function order_book(client::GateioClient = Gateio.public_client; kw...)
+function order_book(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return order_book(client, OrderBookQuery(; kw...))
 end
 

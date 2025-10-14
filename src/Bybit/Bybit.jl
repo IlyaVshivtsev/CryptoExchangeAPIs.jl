@@ -9,10 +9,15 @@ export BybitCommonQuery,
     BybitData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type BybitData <: AbstractAPIsData end
 abstract type BybitCommonQuery  <: AbstractAPIsQuery end
@@ -69,9 +74,9 @@ struct Data{D<:Maybe{<:AbstractAPIsData}} <: AbstractAPIsData
 end
 
 """
-    BybitClient <: AbstractAPIsClient
+    BybitConfig <: AbstractAPIsConfig
 
-Client info.
+Bybit client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -84,7 +89,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct BybitClient <: AbstractAPIsClient
+Base.@kwdef struct BybitConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -95,9 +100,45 @@ Base.@kwdef struct BybitClient <: AbstractAPIsClient
 end
 
 """
-    public_client = BybitClient(; base_url = "https://api.bybit.com")
+    BybitClient <: AbstractAPIsClient
+
+Client for interacting with Bybit exchange API.
+
+## Fields
+- `config::BybitConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = BybitClient(; base_url = "https://api.bybit.com")
+mutable struct BybitClient <: AbstractAPIsClient
+    config::BybitConfig
+    curl_client::CurlClient
+
+    function BybitClient(config::BybitConfig)
+        new(config, CurlClient())
+    end
+
+    function BybitClient(; kw...)
+        return BybitClient(BybitConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::BybitClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::BybitClient) = isopen(c.curl_client)
+
+"""
+    close(client::BybitClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::BybitClient) = close(c.curl_client)
+
+"""
+    public_config = BybitConfig(; base_url = "https://api.bybit.com")
+"""
+const public_config = BybitConfig(; base_url = "https://api.bybit.com")
 
 """
     BybitAPIError{T} <: AbstractAPIsError
@@ -136,11 +177,11 @@ end
 
 function CryptoExchangeAPIs.request_sign!(client::BybitClient, query::Q, ::String)::Q where {Q<:BybitPrivateQuery}
     query.timestamp = Dates.now(UTC)
-    query.api_key = client.public_key
+    query.api_key = client.config.public_key
     query.signature = nothing
     body::String = Serde.to_query(query)
-    salt = join([string(round(Int64, 1000 * datetime2unix(query.timestamp))), client.public_key, query.recv_window, body])
-    query.signature = hexdigest("sha256", client.secret_key, salt)
+    salt = join([string(round(Int64, 1000 * datetime2unix(query.timestamp))), client.config.public_key, query.recv_window, body])
+    query.signature = hexdigest("sha256", client.config.secret_key, salt)
     return query
 end
 
@@ -162,7 +203,7 @@ function CryptoExchangeAPIs.request_headers(client::BybitClient, query::BybitPri
     return Pair{String,String}[
         "X-BAPI-SIGN-TYPE" => "2",
         "X-BAPI-SIGN" => query.signature,
-        "X-BAPI-API-KEY" => client.public_key,
+        "X-BAPI-API-KEY" => client.config.public_key,
         "X-BAPI-TIMESTAMP" => string(round(Int64, 1000 * datetime2unix(query.timestamp))),
         "X-BAPI-RECV-WINDOW" => string(query.recv_window),
         "Content-Type" => "application/x-www-form-urlencoded",

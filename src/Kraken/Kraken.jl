@@ -9,10 +9,15 @@ export KrakenCommonQuery,
     KrakenData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig
 
 abstract type KrakenData <: AbstractAPIsData end
 abstract type KrakenCommonQuery  <: AbstractAPIsQuery end
@@ -33,9 +38,9 @@ struct Data{D} <: AbstractAPIsData
 end
 
 """
-    KrakenClient <: AbstractAPIsClient
+    KrakenConfig <: AbstractAPIsConfig
 
-Client info.
+Gate.io client config.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -48,7 +53,7 @@ Client info.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
 """
-Base.@kwdef struct KrakenClient <: AbstractAPIsClient
+Base.@kwdef struct KrakenConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -59,9 +64,45 @@ Base.@kwdef struct KrakenClient <: AbstractAPIsClient
 end
 
 """
-    public_client = KrakenClient(; base_url = "https://api.kraken.com")
+    KrakenClient <: AbstractAPIsClient
+
+Client for interacting with Gate.io exchange API.
+
+## Fields
+- `config::KrakenConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
 """
-const public_client = KrakenClient(; base_url = "https://api.kraken.com")
+mutable struct KrakenClient <: AbstractAPIsClient
+    config::KrakenConfig
+    curl_client::CurlClient
+
+    function KrakenClient(config::KrakenConfig)
+        new(config, CurlClient())
+    end
+
+    function KrakenClient(; kw...)
+        return KrakenClient(KrakenConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::KrakenClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::KrakenClient) = isopen(c.curl_client)
+
+"""
+    close(client::KrakenClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::KrakenClient) = close(c.curl_client)
+
+"""
+    public_config = KrakenConfig(; base_url = "https://api.kraken.com")
+"""
+const public_config = KrakenConfig(; base_url = "https://api.kraken.com")
 
 """
     KrakenAPIError{T} <: AbstractAPIsError
@@ -95,7 +136,7 @@ function CryptoExchangeAPIs.request_sign!(client::KrakenClient, query::Q, endpoi
     encoded = Vector{UInt8}(string(round(Int64, 1000 * datetime2unix(query.nonce)), body))
     bdigest = digest("sha256", encoded)
     salt = [Vector{UInt8}("/" * endpoint); bdigest]
-    query.signature = base64encode(digest("sha512", base64decode(client.secret_key), salt))
+    query.signature = base64encode(digest("sha512", base64decode(client.config.secret_key), salt))
     return query
 end
 
@@ -128,7 +169,7 @@ end
 function CryptoExchangeAPIs.request_headers(client::KrakenClient, query::KrakenPrivateQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
         "Content-Type" => "application/x-www-form-urlencoded",
-        "API-Key"  => client.public_key,
+        "API-Key"  => client.config.public_key,
         "API-Sign" => query.signature,
     ]
 end

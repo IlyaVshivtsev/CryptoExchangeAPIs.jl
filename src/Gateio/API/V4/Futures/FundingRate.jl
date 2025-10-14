@@ -28,7 +28,7 @@ end
 
 """
     funding_rate(client::GateioClient, query::FundingRateQuery)
-    funding_rate(client::GateioClient = Gateio.public_client; kw...)
+    funding_rate(client::GateioClient = Gateio.GateioClient(Gateio.public_config); kw...)
 
 Funding rate history.
 
@@ -45,34 +45,22 @@ Funding rate history.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Futures.funding_rate(; 
     settle = Gateio.API.V4.Futures.FundingRate.Settle.usdt,
     contract = "BTC_USDT",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "t":"2024-04-16T08:00:00",
-    "r":0.0001
-  },
-  ...
-]
 ```
 """
 function funding_rate(client::GateioClient, query::FundingRateQuery)
     return APIsRequest{Vector{FundingRateData}}("GET", "api/v4/futures/$(query.settle)/funding_rate", query)(client)
 end
 
-function funding_rate(client::GateioClient = Gateio.public_client; kw...)
+function funding_rate(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return funding_rate(client, FundingRateQuery(; kw...))
 end
 

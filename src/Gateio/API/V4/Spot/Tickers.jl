@@ -39,7 +39,7 @@ end
 
 """
     tickers(client::GateioClient, query::TickersQuery)
-    tickers(client::GateioClient = Gateio.public_client; kw...)
+    tickers(client::GateioClient = Gateio.GateioClient(Gateio.public_config); kw...)
 
 Retrieve ticker information.
 
@@ -55,45 +55,21 @@ Retrieve ticker information.
 ## Code samples:
 
 ```julia
-using Serde
 using CryptoExchangeAPIs.Gateio
 
 result = Gateio.API.V4.Spot.tickers(;
     currency_pair = "ADA_USDT",
 )
-
-to_pretty_json(result.result)
-```
-
-## Result:
-
-```json
-[
-  {
-    "currency_pair":"ADA_USDT",
-    "base_volume":2.0167711540647e7,
-    "change_percentage":-4.77,
-    "change_utc0":null,
-    "change_utc8":null,
-    "etf_leverage":null,
-    "etf_net_value":null,
-    "etf_pre_net_value":null,
-    "etf_pre_timestamp":null,
-    "high_24h":0.623,
-    "highest_bid":0.5869,
-    "last":0.5869,
-    "low_24h":0.5721,
-    "lowest_ask":0.587,
-    "quote_volume":1.1922473751288e7
-  }
-]
 ```
 """
 function tickers(client::GateioClient, query::TickersQuery)
     return APIsRequest{Vector{TickersData}}("GET", "api/v4/spot/tickers", query)(client)
 end
 
-function tickers(client::GateioClient = Gateio.public_client; kw...)
+function tickers(
+    client::GateioClient = Gateio.GateioClient(Gateio.public_config);
+    kw...,
+)
     return tickers(client, TickersQuery(; kw...))
 end
 
