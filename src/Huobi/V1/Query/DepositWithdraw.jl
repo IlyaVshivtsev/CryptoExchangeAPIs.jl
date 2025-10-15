@@ -14,6 +14,8 @@ using CryptoExchangeAPIs: Maybe, APIsRequest
 
 @enumx DirectQuery prev next
 
+@enumx DepositWithdrawType deposit withdraw
+
 Base.@kwdef mutable struct DepositWithdrawQuery <: HuobiPrivateQuery
     AccessKeyId::Maybe{String} = nothing
     Signature::Maybe{String} = nothing
@@ -25,7 +27,7 @@ Base.@kwdef mutable struct DepositWithdrawQuery <: HuobiPrivateQuery
     direct::Maybe{DirectQuery.T} = nothing
     from::Maybe{String} = nothing
     size::Maybe{Int64} = nothing
-    type::String
+    type::DepositWithdrawType.T
 end
 
 struct DepositWithdrawData <: HuobiData
@@ -41,7 +43,7 @@ struct DepositWithdrawData <: HuobiData
     state::Maybe{String}
     sub_type::Maybe{String}
     tx_hash::Maybe{String}
-    type::Maybe{String}
+    type::Maybe{DepositWithdrawType.T}
     updated_at::Maybe{NanoDate}
 end
 
@@ -79,7 +81,7 @@ result = Huobi.V1.Query.deposit_withdraw(
     currency = "usdt",
     from = "1",
     size = 500,
-    type = "withdraw",
+    type = Huobi.V1.Query.DepositWithdraw.DepositWithdrawType.withdraw,
 )
 ```
 """

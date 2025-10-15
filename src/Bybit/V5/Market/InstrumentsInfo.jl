@@ -31,12 +31,12 @@ function Serde.ser_type(::Type{<:InstrumentsInfoQuery}, x::Category.T)::String
 end
 
 struct LotSizeFilter <: BybitData
-  basePrecision::Float64
-  quotePrecision::Float64
+  basePrecision::Maybe{Float64}
+  quotePrecision::Maybe{Float64}
   minOrderQty::Float64
   maxOrderQty::Float64
-  minOrderAmt::Float64
-  maxOrderAmt::Float64
+  minOrderAmt::Maybe{Float64}
+  maxOrderAmt::Maybe{Float64}
 end
 
 struct PriceFilter <: BybitData
@@ -52,11 +52,11 @@ struct InstrumentsInfoData <: BybitData
   symbol::String
   baseCoin::String
   quoteCoin::String
-  innovation::Int64
+  innovation::Maybe{Int64}
   status::String
   lotSizeFilter::LotSizeFilter
   priceFilter::PriceFilter
-  riskParameters::RiskParameters
+  riskParameters::Maybe{RiskParameters}
 end
 
 """

@@ -10,10 +10,14 @@ using Dates, NanoDates, TimeZones
 using CryptoExchangeAPIs.Binance
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef struct HistoricalTradesQuery <: BinancePublicQuery
+Base.@kwdef mutable struct HistoricalTradesQuery <: BinancePrivateQuery
     symbol::String
     limit::Maybe{Int64} = nothing
     fromId::Maybe{Int64} = nothing
+
+    recvWindow::Maybe{Int64} = nothing
+    signature::Maybe{String} = nothing
+    timestamp::Maybe{DateTime} = nothing
 end
 
 struct HistoricalTradesData <: BinanceData

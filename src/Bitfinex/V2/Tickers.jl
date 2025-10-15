@@ -11,7 +11,11 @@ using CryptoExchangeAPIs.Bitfinex
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
 Base.@kwdef struct TickersQuery <: BitfinexPublicQuery
-    symbols::String = "ALL"
+    symbols::Union{String, Vector{String}} = "ALL"
+end
+
+function Serde.SerQuery.ser_value(::Type{<:TickersQuery}, ::Val{:symbols}, x::Vector{String})
+    return join(x, ",")
 end
 
 struct TickersData <: BitfinexData

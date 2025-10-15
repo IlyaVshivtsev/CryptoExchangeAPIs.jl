@@ -6,14 +6,20 @@ export Ticker24hrQuery,
 
 using Serde
 using Dates, NanoDates, TimeZones
+using EnumX
 
 using CryptoExchangeAPIs.Binance
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
+@enumx TickerType begin
+    FULL
+    MINI
+end
+
 Base.@kwdef struct Ticker24hrQuery <: BinancePublicQuery
     symbol::Maybe{String} = nothing
     symbols::Maybe{Vector{String}} = nothing
-    type::Maybe{String} = nothing
+    type::Maybe{TickerType.T} = nothing
 end
 
 function Serde.SerQuery.ser_type(::Type{<:Ticker24hrQuery}, x::Vector{String})::String
@@ -58,7 +64,7 @@ end
 |:----------|:---------------|:---------|:------------|
 | symbol    | String         | false    |             |
 | symbols   | Vector{String} | false    |             |
-| type      | String         | false    |             |
+| type      | TickerType     | false    | FULL MINI   |
 
 ## Code samples:
 

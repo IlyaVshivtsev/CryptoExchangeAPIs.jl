@@ -11,7 +11,11 @@ using CryptoExchangeAPIs.Upbit
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
 Base.@kwdef struct OrderbookQuery <: UpbitPublicQuery
-    markets::String
+    markets::Union{Vector{String},String}
+end
+
+function Serde.SerQuery.ser_type(::Type{<:OrderbookQuery}, x::Vector{String})
+    return join(x, ",")
 end
 
 struct OrderbookUnit <: UpbitData

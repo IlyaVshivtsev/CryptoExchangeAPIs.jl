@@ -35,7 +35,7 @@ struct TickersData <: BybitData
     ask1Price::Maybe{Float64}
     ask1Size::Maybe{Float64}
     lastPrice::Float64
-    prevPrice24h::Float64
+    prevPrice24h::Maybe{Float64}
     price24hPcnt::Maybe{Float64}
     highPrice24h::Float64
     lowPrice24h::Float64

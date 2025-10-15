@@ -21,7 +21,7 @@ using CryptoExchangeAPIs: Maybe, APIsRequest
 end
 
 Base.@kwdef struct InstrumentsQuery <: OkexPublicQuery
-    instType::Maybe{InstType.T}
+    instType::InstType.T
     uly::Maybe{String} = nothing
     instFamily::Maybe{String} = nothing
     instId::Maybe{String} = nothing

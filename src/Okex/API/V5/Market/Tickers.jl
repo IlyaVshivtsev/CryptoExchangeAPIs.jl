@@ -16,7 +16,7 @@ using CryptoExchangeAPIs: Maybe, APIsRequest
 
 Base.@kwdef struct TickersQuery <: OkexPublicQuery
     instFamily::Maybe{String} = nothing
-    instType::Maybe{InstType.T} = nothing
+    instType::InstType.T
     uly::Maybe{String} = nothing
 end
 

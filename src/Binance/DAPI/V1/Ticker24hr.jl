@@ -2,7 +2,7 @@ module Ticker24hr
 
 export Ticker24hrQuery,
     Ticker24hrData,
-    ticker_24hr
+    ticker24hr
 
 using Serde
 using Dates, NanoDates, TimeZones
@@ -36,8 +36,8 @@ struct Ticker24hrData <: BinanceData
 end
 
 """
-    ticker_24hr(client::BinanceClient, query::Ticker24hrQuery)
-    ticker_24hr(client::BinanceClient = Binance.BinanceClient(Binance.public_dapi_config); kw...)
+    ticker24hr(client::BinanceClient, query::Ticker24hrQuery)
+    ticker24hr(client::BinanceClient = Binance.BinanceClient(Binance.public_dapi_config); kw...)
 
 24 hour rolling window price change statistics.
 
@@ -55,20 +55,20 @@ end
 ```julia
 using CryptoExchangeAPIs.Binance
 
-result = Binance.DAPI.V1.ticker_24hr(;
+result = Binance.DAPI.V1.ticker24hr(;
     pair = "BTCUSD",
 )
 ```
 """
-function ticker_24hr(client::BinanceClient, query::Ticker24hrQuery)
+function ticker24hr(client::BinanceClient, query::Ticker24hrQuery)
     return APIsRequest{Vector{Ticker24hrData}}("GET", "dapi/v1/ticker/24hr", query)(client)
 end
 
-function ticker_24hr(
+function ticker24hr(
     client::BinanceClient = Binance.BinanceClient(Binance.public_dapi_config);
     kw...,
 )
-    return ticker_24hr(client, Ticker24hrQuery(; kw...))
+    return ticker24hr(client, Ticker24hrQuery(; kw...))
 end
 
 end

@@ -14,7 +14,7 @@ using CryptoExchangeAPIs: Maybe, APIsRequest
 @enumx OrderBookLimit FIVE=5 TEN=10 TWENTY=20 FIFTY=50 HUNDRED=100 HUNDRED_FIFTY=150
 
 Base.@kwdef struct OrderBookQuery <: PoloniexPublicQuery
-    symbol::Maybe{String} = nothing
+    symbol::String
     limit::Maybe{OrderBookLimit.T} = nothing
     scale::Maybe{Int64} = nothing
 end

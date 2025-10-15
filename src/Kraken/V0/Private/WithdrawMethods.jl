@@ -6,14 +6,17 @@ export WithdrawMethodsQuery,
 
 using Serde
 using Dates, NanoDates, TimeZones
+using EnumX
 
 using CryptoExchangeAPIs.Kraken
 using CryptoExchangeAPIs.Kraken: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
+@enumx AssetClass currency tokenized_asset
+
 Base.@kwdef mutable struct WithdrawMethodsQuery <: KrakenPrivateQuery
     asset::Maybe{String} = nothing
-    aclass::Maybe{String} = nothing
+    aclass::Maybe{AssetClass.T} = nothing
     network::Maybe{String} = nothing
 
     nonce::Maybe{DateTime} = nothing
@@ -37,11 +40,11 @@ Retrieve a list of withdrawal methods available for the user.
 
 ## Parameters:
 
-| Parameter | Type     | Required | Description |
-|:----------|:---------|:---------|:------------|
-| asset     | String   | false    |             |
-| aclass    | String   | false    |             |
-| network   | String   | false    |             |
+| Parameter | Type       | Required | Description |
+|:----------|:-----------|:---------|:------------|
+| asset     | String     | false    |             |
+| aclass    | AssetClass | false    |             |
+| network   | String     | false    |             |
 
 ## Code samples:
 

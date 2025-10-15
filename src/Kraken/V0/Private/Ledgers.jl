@@ -14,6 +14,8 @@ using CryptoExchangeAPIs.Kraken
 using CryptoExchangeAPIs.Kraken: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
+@enumx AssetClass currency tokenized_asset
+
 @enumx LedgerType begin
     all
     deposit
@@ -30,7 +32,7 @@ end
 
 Base.@kwdef mutable struct LedgersQuery <: KrakenPrivateQuery
     _end::Maybe{DateTime} = nothing
-    aclass::Maybe{String} = nothing
+    aclass::Maybe{AssetClass.T} = nothing
     asset::Maybe{String} = nothing
     ofs::Maybe{Int64} = nothing
     start::Maybe{DateTime} = nothing
@@ -41,7 +43,7 @@ Base.@kwdef mutable struct LedgersQuery <: KrakenPrivateQuery
 end
 
 struct Ledger <: KrakenData
-    aclass::Maybe{String}
+    aclass::Maybe{AssetClass.T}
     amount::Maybe{String}
     asset::Maybe{String}
     balance::Maybe{String}
@@ -70,7 +72,7 @@ Retrieve information about ledger entries. 50 results are returned at a time, th
 | Parameter | Type       | Required | Description |
 |:----------|:-----------|:---------|:------------|
 | _end      | DateTime   | false    |             |
-| aclass    | String     | false    |             |
+| aclass    | AssetClass | false    |             |
 | asset     | String     | false    |             |
 | ofs       | Int64      | false    |             |
 | start     | DateTime   | false    |             |

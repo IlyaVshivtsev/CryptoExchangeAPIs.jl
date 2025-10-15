@@ -12,9 +12,11 @@ using CryptoExchangeAPIs.Kraken
 using CryptoExchangeAPIs.Kraken: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
+@enumx AssetClass currency tokenized_asset
+
 Base.@kwdef struct AssetsQuery <: KrakenPublicQuery
     asset::Maybe{Vector{String}} = nothing
-    aclass::Maybe{String} = nothing
+    aclass::Maybe{AssetClass.T} = nothing
 end
 
 function Serde.SerQuery.ser_type(::Type{AssetsQuery}, x::Vector{String})::String
@@ -29,7 +31,7 @@ end
 end
 
 struct AssetsData <: KrakenData
-    aclass::String
+    aclass::AssetClass.T
     altname::String
     decimals::Int64
     display_decimals::Int64
@@ -50,7 +52,7 @@ Get information about the assets that are available for deposit, withdrawal, tra
 | Parameter | Type           | Required | Description |
 |:----------|:---------------|:---------|:------------|
 | asset     | Vector{String} | false    |             |
-| aclass    | String         | false    |             |
+| aclass    | AssetClass     | false    |             |
 
 ## Code samples:
 
