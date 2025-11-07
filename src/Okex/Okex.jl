@@ -17,7 +17,8 @@ import ..CryptoExchangeAPIs: Maybe,
     AbstractAPIsData,
     AbstractAPIsQuery,
     AbstractAPIsClient,
-    AbstractAPIsConfig
+    AbstractAPIsConfig,
+    RequestOptions
 
 abstract type OkexData <: AbstractAPIsData end
 abstract type OkexCommonQuery  <: AbstractAPIsQuery end
@@ -47,7 +48,7 @@ end
 """
     OkexConfig <: AbstractAPIsConfig
 
-Gate.io client config.
+Okex client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -56,26 +57,24 @@ Gate.io client config.
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
 - `passphrase::String`: Passphrase for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
 Base.@kwdef struct OkexConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
     passphrase::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
 
 """
     OkexClient <: AbstractAPIsClient
 
-Client for interacting with Gate.io exchange API.
+Client for interacting with Okex exchange API.
 
 ## Fields
 - `config::OkexConfig`: Configuration with base URL, API keys, and settings

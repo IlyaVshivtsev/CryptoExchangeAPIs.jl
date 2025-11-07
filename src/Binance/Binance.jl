@@ -27,7 +27,7 @@ abstract type BinancePrivateQuery <: BinanceCommonQuery end
 """
     BinanceConfig <: AbstractAPIsConfig
 
-Binance client config. Transport options live in `request::RequestOptions`.
+Binance client config. Transport options live in `request_options::RequestOptions`.
 
 Required:
 - `base_url::String`
@@ -37,7 +37,7 @@ Optional:
 - `secret_key::String`
 - `account_name::String`
 - `description::String`
-- `request::RequestOptions` (interface/proxy/timeouts)
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
 Base.@kwdef struct BinanceConfig <: AbstractAPIsConfig
     base_url::String = "https://api.binance.com"

@@ -18,7 +18,8 @@ import ..CryptoExchangeAPIs: Maybe,
     AbstractAPIsData,
     AbstractAPIsQuery,
     AbstractAPIsClient,
-    AbstractAPIsConfig
+    AbstractAPIsConfig,
+    RequestOptions
 
 abstract type CoinbaseData <: AbstractAPIsData end
 abstract type CoinbaseCommonQuery  <: AbstractAPIsQuery end
@@ -29,7 +30,7 @@ abstract type CoinbasePrivateQuery <: CoinbaseCommonQuery end
 """
     CoinbaseConfig <: AbstractAPIsConfig
 
-Coinbase client config.
+Coinbase client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -38,20 +39,18 @@ Coinbase client config.
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
 - `passphrase::String`: Passphrase for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
 Base.@kwdef struct CoinbaseConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
     passphrase::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
 
 """

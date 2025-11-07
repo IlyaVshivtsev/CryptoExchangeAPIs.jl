@@ -136,6 +136,7 @@ end
 
 isretriable(::Exception) = false
 isretriable(::AbstractCurlError) = true
+isretriable(e::APIsResult{<:Exception}) = isretriable(e.result)
 
 retry_timeout(::Exception) = 1.0
 retry_maxcount(::Exception) = RETRY_MAX_RETRIES
