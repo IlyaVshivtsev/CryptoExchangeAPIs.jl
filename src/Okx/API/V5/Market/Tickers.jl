@@ -8,19 +8,19 @@ using Serde
 using Dates, NanoDates, TimeZones
 using EnumX
 
-using CryptoExchangeAPIs.Okex
-using CryptoExchangeAPIs.Okex: Data
+using CryptoExchangeAPIs.Okx
+using CryptoExchangeAPIs.Okx: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
 @enumx InstType SPOT SWAP FUTURES OPTION
 
-Base.@kwdef struct TickersQuery <: OkexPublicQuery
+Base.@kwdef struct TickersQuery <: OkxPublicQuery
     instFamily::Maybe{String} = nothing
     instType::InstType.T
     uly::Maybe{String} = nothing
 end
 
-struct TickersData <: OkexData
+struct TickersData <: OkxData
     instId::Maybe{String}
     askPx::Maybe{Float64}
     askSz::Maybe{Float64}
@@ -44,8 +44,8 @@ function Serde.isempty(::Type{TickersData}, x)
 end
 
 """
-    tickers(client::OkexClient, query::TickersQuery)
-    tickers(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
+    tickers(client::OkxClient, query::TickersQuery)
+    tickers(client::OkxClient = Okx.OkxClient(Okx.public_config); kw...)
 
 Retrieve the latest price snapshot, best bid/ask price, and trading volume in the last 24 hours.
 
@@ -62,18 +62,18 @@ Retrieve the latest price snapshot, best bid/ask price, and trading volume in th
 ## Code samples:
 
 ```julia
-using CryptoExchangeAPIs.Okex
+using CryptoExchangeAPIs.Okx
 
-result = Okex.API.V5.Market.tickers(;
-    instType = Okex.API.V5.Market.Tickers.InstType.SPOT,
+result = Okx.API.V5.Market.tickers(;
+    instType = Okx.API.V5.Market.Tickers.InstType.SPOT,
 )
 ```
 """
-function tickers(client::OkexClient, query::TickersQuery)
+function tickers(client::OkxClient, query::TickersQuery)
     return APIsRequest{Data{TickersData}}("GET", "api/v5/market/tickers", query)(client)
 end
 
-function tickers(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
+function tickers(client::OkxClient = Okx.OkxClient(Okx.public_config); kw...)
     return tickers(client, TickersQuery(; kw...))
 end
 

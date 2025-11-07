@@ -1,12 +1,12 @@
-module Okex
+module Okx
 
-export OkexCommonQuery,
-    OkexPublicQuery,
-    OkexAccessQuery,
-    OkexPrivateQuery,
-    OkexAPIError,
-    OkexClient,
-    OkexData
+export OkxCommonQuery,
+    OkxPublicQuery,
+    OkxAccessQuery,
+    OkxPrivateQuery,
+    OkxAPIError,
+    OkxClient,
+    OkxData
 
 using Serde
 using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
@@ -20,11 +20,11 @@ import ..CryptoExchangeAPIs: Maybe,
     AbstractAPIsConfig,
     RequestOptions
 
-abstract type OkexData <: AbstractAPIsData end
-abstract type OkexCommonQuery  <: AbstractAPIsQuery end
-abstract type OkexPublicQuery  <: OkexCommonQuery end
-abstract type OkexAccessQuery  <: OkexCommonQuery end
-abstract type OkexPrivateQuery <: OkexCommonQuery end
+abstract type OkxData <: AbstractAPIsData end
+abstract type OkxCommonQuery  <: AbstractAPIsQuery end
+abstract type OkxPublicQuery  <: OkxCommonQuery end
+abstract type OkxAccessQuery  <: OkxCommonQuery end
+abstract type OkxPrivateQuery <: OkxCommonQuery end
 
 """
     Data{D} <: AbstractAPIsData
@@ -46,9 +46,9 @@ struct Data{D<:AbstractAPIsData} <: AbstractAPIsData
 end
 
 """
-    OkexConfig <: AbstractAPIsConfig
+    OkxConfig <: AbstractAPIsConfig
 
-Okex client config. Transport options live in `request_options::RequestOptions`.
+Okx client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -61,7 +61,7 @@ Okex client config. Transport options live in `request_options::RequestOptions`.
 - `description::String`: Description of the client.
 - `request_options::RequestOptions` (interface/proxy/timeouts)
 """
-Base.@kwdef struct OkexConfig <: AbstractAPIsConfig
+Base.@kwdef struct OkxConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
@@ -72,48 +72,48 @@ Base.@kwdef struct OkexConfig <: AbstractAPIsConfig
 end
 
 """
-    OkexClient <: AbstractAPIsClient
+    OkxClient <: AbstractAPIsClient
 
-Client for interacting with Okex exchange API.
+Client for interacting with Okx exchange API.
 
 ## Fields
-- `config::OkexConfig`: Configuration with base URL, API keys, and settings
+- `config::OkxConfig`: Configuration with base URL, API keys, and settings
 - `curl_client::CurlClient`: HTTP client for API requests
 """
-mutable struct OkexClient <: AbstractAPIsClient
-    config::OkexConfig
+mutable struct OkxClient <: AbstractAPIsClient
+    config::OkxConfig
     curl_client::CurlClient
 
-    function OkexClient(config::OkexConfig)
+    function OkxClient(config::OkxConfig)
         new(config, CurlClient())
     end
 
-    function OkexClient(; kw...)
-        return OkexClient(OkexConfig(; kw...))
+    function OkxClient(; kw...)
+        return OkxClient(OkxConfig(; kw...))
     end
 end
 
 """
-    isopen(client::OkexClient) -> Bool
+    isopen(client::OkxClient) -> Bool
 
 Checks if the `client` instance is open and ready for API requests.
 """
-Base.isopen(c::OkexClient) = isopen(c.curl_client)
+Base.isopen(c::OkxClient) = isopen(c.curl_client)
 
 """
-    close(client::OkexClient)
+    close(client::OkxClient)
 
 Closes the `client` instance and free associated resources.
 """
-Base.close(c::OkexClient) = close(c.curl_client)
+Base.close(c::OkxClient) = close(c.curl_client)
 
 """
-    public_config = OkexConfig(; base_url = "https://www.okx.com")
+    public_config = OkxConfig(; base_url = "https://www.okx.com")
 """
-const public_config = OkexConfig(; base_url = "https://www.okx.com")
+const public_config = OkxConfig(; base_url = "https://www.okx.com")
 
 """
-    OkexAPIError{T} <: AbstractAPIsError
+    OkxAPIError{T} <: AbstractAPIsError
 
 Exception thrown when an API method fails with code `T`.
 
@@ -124,28 +124,28 @@ Exception thrown when an API method fails with code `T`.
 ## Optional fields
 - `data::Vector{Any}`: Error result data.
 """
-struct OkexAPIError{T} <: AbstractAPIsError
+struct OkxAPIError{T} <: AbstractAPIsError
     code::Int64
     msg::String
     data::Maybe{Vector{Any}}
 
-    function OkexAPIError(code::Int64, x...)
+    function OkxAPIError(code::Int64, x...)
         iszero(code) && throw(ArgumentError("code must be nonzero"))
         return new{code}(code, x...)
     end
 end
 
-CryptoExchangeAPIs.error_type(::OkexClient) = OkexAPIError
+CryptoExchangeAPIs.error_type(::OkxClient) = OkxAPIError
 
-function Base.show(io::IO, e::OkexAPIError)
+function Base.show(io::IO, e::OkxAPIError)
     return print(io, "code = ", "\"", e.code, "\"", ", ", "msg = ", "\"", e.msg, "\"")
 end
 
-function CryptoExchangeAPIs.request_sign!(::OkexClient, query::Q, ::String)::Q where {Q<:OkexPublicQuery}
+function CryptoExchangeAPIs.request_sign!(::OkxClient, query::Q, ::String)::Q where {Q<:OkxPublicQuery}
     return query
 end
 
-function CryptoExchangeAPIs.request_sign!(client::OkexClient, query::Q, endpoint::String)::Q where {Q<:OkexPrivateQuery}
+function CryptoExchangeAPIs.request_sign!(client::OkxClient, query::Q, endpoint::String)::Q where {Q<:OkxPrivateQuery}
     query.signature = nothing
     str_query = Serde.to_query(query)
     body::String = isempty(str_query) ? "" : "?" * str_query
@@ -155,21 +155,21 @@ function CryptoExchangeAPIs.request_sign!(client::OkexClient, query::Q, endpoint
     return query
 end
 
-function CryptoExchangeAPIs.request_body(::Q)::String where {Q<:OkexCommonQuery}
+function CryptoExchangeAPIs.request_body(::Q)::String where {Q<:OkxCommonQuery}
     return ""
 end
 
-function CryptoExchangeAPIs.request_query(query::Q)::String where {Q<:OkexCommonQuery}
+function CryptoExchangeAPIs.request_query(query::Q)::String where {Q<:OkxCommonQuery}
     return Serde.to_query(query)
 end
 
-function CryptoExchangeAPIs.request_headers(client::OkexClient, ::OkexPublicQuery)::Vector{Pair{String,String}}
+function CryptoExchangeAPIs.request_headers(client::OkxClient, ::OkxPublicQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
         "Content-Type" => "application/json"
     ]
 end
 
-function CryptoExchangeAPIs.request_headers(client::OkexClient, query::OkexPrivateQuery)::Vector{Pair{String,String}}
+function CryptoExchangeAPIs.request_headers(client::OkxClient, query::OkxPrivateQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
         "OK-ACCESS-TIMESTAMP" => Dates.format(query.timestamp, "yyyy-mm-ddTHH:MM:SS.sss\\Z"),
         "Content-Type" => "application/json",

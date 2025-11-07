@@ -8,13 +8,13 @@ using Serde
 using Dates, NanoDates, TimeZones
 using EnumX
 
-using CryptoExchangeAPIs.Okex
-using CryptoExchangeAPIs.Okex: Data
+using CryptoExchangeAPIs.Okx
+using CryptoExchangeAPIs.Okx: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
 @enumx TimeInterval m1 m3 m5 m15 m30 h1 h2 h4 h6 h12 d1 d2 d3 w1 M1 M3
 
-Base.@kwdef struct CandlesQuery <: OkexPublicQuery
+Base.@kwdef struct CandlesQuery <: OkxPublicQuery
     instId::String
     after::Maybe{DateTime} = nothing
     bar::Maybe{TimeInterval.T} = nothing
@@ -41,7 +41,7 @@ function Serde.ser_type(::Type{<:CandlesQuery}, x::TimeInterval.T)::String
     x == TimeInterval.M3  && return "3Mutc"
 end
 
-struct CandlesData <: OkexData
+struct CandlesData <: OkxData
     openTime::Maybe{NanoDate}
     openPrice::Maybe{Float64}
     highPrice::Maybe{Float64}
@@ -54,8 +54,8 @@ struct CandlesData <: OkexData
 end
 
 """
-    candles(client::OkexClient, query::CandlesQuery)
-    candles(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
+    candles(client::OkxClient, query::CandlesQuery)
+    candles(client::OkxClient = Okx.OkxClient(Okx.public_config); kw...)
 
 Retrieve the candlestick charts.
 
@@ -74,19 +74,19 @@ Retrieve the candlestick charts.
 ## Code samples:
 
 ```julia
-using CryptoExchangeAPIs.Okex
+using CryptoExchangeAPIs.Okx
 
-result = Okex.API.V5.Market.candles(;
+result = Okx.API.V5.Market.candles(;
     instId = "BTC-USDT",
-    bar = Okex.API.V5.Market.Candles.TimeInterval.d1,
+    bar = Okx.API.V5.Market.Candles.TimeInterval.d1,
 )
 ```
 """
-function candles(client::OkexClient, query::CandlesQuery)
+function candles(client::OkxClient, query::CandlesQuery)
     return APIsRequest{Data{CandlesData}}("GET", "api/v5/market/candles", query)(client)
 end
 
-function candles(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
+function candles(client::OkxClient = Okx.OkxClient(Okx.public_config); kw...)
     return candles(client, CandlesQuery(; kw...))
 end
 

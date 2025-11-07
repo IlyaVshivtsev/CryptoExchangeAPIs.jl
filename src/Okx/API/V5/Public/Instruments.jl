@@ -8,8 +8,8 @@ using Serde
 using Dates, NanoDates, TimeZones
 using EnumX
 
-using CryptoExchangeAPIs.Okex
-using CryptoExchangeAPIs.Okex: Data
+using CryptoExchangeAPIs.Okx
+using CryptoExchangeAPIs.Okx: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
 @enumx InstType begin
@@ -20,14 +20,14 @@ using CryptoExchangeAPIs: Maybe, APIsRequest
     OPTION
 end
 
-Base.@kwdef struct InstrumentsQuery <: OkexPublicQuery
+Base.@kwdef struct InstrumentsQuery <: OkxPublicQuery
     instType::InstType.T
     uly::Maybe{String} = nothing
     instFamily::Maybe{String} = nothing
     instId::Maybe{String} = nothing
 end
 
-struct InstrumentsData <: OkexData
+struct InstrumentsData <: OkxData
     instId::String
     baseCcy::Maybe{String}
     quoteCcy::Maybe{String}
@@ -64,8 +64,8 @@ function Serde.isempty(::Type{InstrumentsData}, x)
 end
 
 """
-    instruments(client::OkexClient, query::InstrumentsQuery)
-    instruments(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
+    instruments(client::OkxClient, query::InstrumentsQuery)
+    instruments(client::OkxClient = Okx.OkxClient(Okx.public_config); kw...)
 
 Retrieve a list of instruments with open contracts.
 
@@ -85,18 +85,18 @@ Retrieve a list of instruments with open contracts.
 ## Code samples:
 
 ```julia
-using CryptoExchangeAPIs.Okex
+using CryptoExchangeAPIs.Okx
 
-result = Okex.API.V5.Public.instruments(;
-    instType = Okex.API.V5.Public.Instruments.InstType.SPOT,
+result = Okx.API.V5.Public.instruments(;
+    instType = Okx.API.V5.Public.Instruments.InstType.SPOT,
 )
 ```
 """
-function instruments(client::OkexClient, query::InstrumentsQuery)
+function instruments(client::OkxClient, query::InstrumentsQuery)
     return APIsRequest{Data{InstrumentsData}}("GET", "api/v5/public/instruments", query)(client)
 end
 
-function instruments(client::OkexClient = Okex.OkexClient(Okex.public_config); kw...)
+function instruments(client::OkxClient = Okx.OkxClient(Okx.public_config); kw...)
     return instruments(client, InstrumentsQuery(; kw...))
 end
 

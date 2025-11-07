@@ -7,18 +7,18 @@ export CurrenciesQuery,
 using Serde
 using Dates, NanoDates, TimeZones
 
-using CryptoExchangeAPIs.Okex
-using CryptoExchangeAPIs.Okex: Data
+using CryptoExchangeAPIs.Okx
+using CryptoExchangeAPIs.Okx: Data
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-Base.@kwdef mutable struct CurrenciesQuery <: OkexPrivateQuery
+Base.@kwdef mutable struct CurrenciesQuery <: OkxPrivateQuery
     ccy::Maybe{String} = nothing
 
     signature::Maybe{String} = nothing
     timestamp::Maybe{DateTime} = nothing
 end
 
-struct CurrenciesData <: OkexData
+struct CurrenciesData <: OkxData
     canDep::Bool
     canInternal::Bool
     canWd::Bool
@@ -48,8 +48,8 @@ function Serde.isempty(::Type{<:CurrenciesData}, x)::Bool
 end
 
 """
-    currencies(client::OkexClient, query::CurrenciesQuery)
-    currencies(client::OkexClient; kw...)
+    currencies(client::OkxClient, query::CurrenciesQuery)
+    currencies(client::OkxClient; kw...)
 
 Get information of coins (available for deposit and withdraw) for user.
 
@@ -64,26 +64,26 @@ Get information of coins (available for deposit and withdraw) for user.
 ## Code samples:
 
 ```julia
-using CryptoExchangeAPIs.Okex
+using CryptoExchangeAPIs.Okx
 
-okex_client = OkexClient(;
+okx_client = OkxClient(;
     base_url = "https://www.okx.com",
-    public_key = ENV["OKEX_PUBLIC_KEY"],
-    secret_key = ENV["OKEX_SECRET_KEY"],
-    passphrase = ENV["OKEX_PASSPHRASE"],
+    public_key = ENV["OKX_PUBLIC_KEY"],
+    secret_key = ENV["OKX_SECRET_KEY"],
+    passphrase = ENV["OKX_PASSPHRASE"],
 )
 
-result = Okex.API.V5.Asset.currencies(
-    okex_client;
+result = Okx.API.V5.Asset.currencies(
+    okx_client;
     ccy = "BTC"
 )
 ```
 """
-function currencies(client::OkexClient, query::CurrenciesQuery)
+function currencies(client::OkxClient, query::CurrenciesQuery)
     return APIsRequest{Data{CurrenciesData}}("GET", "api/v5/asset/currencies", query)(client)
 end
 
-function currencies(client::OkexClient; kw...)
+function currencies(client::OkxClient; kw...)
     return currencies(client, CurrenciesQuery(; kw...))
 end
 
