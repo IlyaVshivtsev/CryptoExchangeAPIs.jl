@@ -65,7 +65,7 @@ result = Bybit.V5.Market.orderbook(;
 ```
 """
 function orderbook(client::BybitClient, query::OrderbookQuery)
-    return APIsRequest{Data{OrderbookData}}("GET", "/v5/market/orderbook", query)(client)
+    return APIsRequest{Data{OrderbookData}}("GET", "v5/market/orderbook", query)(client)
 end
 
 function orderbook(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)

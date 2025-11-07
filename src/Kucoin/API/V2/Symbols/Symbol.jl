@@ -58,7 +58,7 @@ result = Kucoin.API.V2.Symbols.symbol(;
 ```
 """
 function symbol(client::KucoinClient, query::SymbolQuery)
-    end_point = "/api/v2/symbols/$(query.symbol)"
+    end_point = "api/v2/symbols/$(query.symbol)"
     return APIsRequest{Data{SymbolData}}("GET", end_point, query)(client)
 end
 

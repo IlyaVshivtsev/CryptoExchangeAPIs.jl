@@ -52,7 +52,7 @@ result = Kucoin.API.V2.Symbols.all_symbols()
 ```
 """
 function all_symbols(client::KucoinClient, query::AllSymbolsQuery)
-    end_point = "/api/v2/symbols/"
+    end_point = "api/v2/symbols"
     return APIsRequest{Data{Vector{AllSymbolsData}}}("GET", end_point, query)(client)
 end
 

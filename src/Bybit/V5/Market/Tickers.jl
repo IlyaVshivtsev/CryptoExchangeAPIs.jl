@@ -75,7 +75,7 @@ result = Bybit.V5.Market.tickers(;
 ```
 """
 function tickers(client::BybitClient, query::TickersQuery)
-    return APIsRequest{Data{List{TickersData}}}("GET", "/v5/market/tickers", query)(client)
+    return APIsRequest{Data{List{TickersData}}}("GET", "v5/market/tickers", query)(client)
 end
 
 function tickers(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)

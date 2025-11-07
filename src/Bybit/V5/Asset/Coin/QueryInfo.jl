@@ -89,7 +89,7 @@ result = Bybit.V5.Asset.Coin.query_info(client; coin = "MNT")
 ```
 """
 function query_info(client::BybitClient, query::QueryInfoQuery)
-    return APIsRequest{Data{QueryInfoData}}("GET", "/v5/asset/coin/query-info", query)(client)
+    return APIsRequest{Data{QueryInfoData}}("GET", "v5/asset/coin/query-info", query)(client)
 end
 
 function query_info(client::BybitClient; kw...)

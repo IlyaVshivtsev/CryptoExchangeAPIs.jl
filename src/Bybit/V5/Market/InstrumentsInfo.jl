@@ -90,7 +90,7 @@ result = Bybit.V5.Market.instruments_info(;
 ```
 """
 function instruments_info(client::BybitClient, query::InstrumentsInfoQuery)
-    return APIsRequest{Data{List{InstrumentsInfoData}}}("GET", "/v5/market/instruments-info", query)(client)
+    return APIsRequest{Data{List{InstrumentsInfoData}}}("GET", "v5/market/instruments-info", query)(client)
 end
 
 function instruments_info(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)

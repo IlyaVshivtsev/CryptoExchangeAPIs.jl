@@ -78,7 +78,7 @@ result = Bybit.V5.Asset.Deposit.query_record(client)
 ```
 """
 function query_record(client::BybitClient, query::QueryRecordQuery)
-    return APIsRequest{Data{Rows{QueryRecordData}}}("GET", "/v5/asset/deposit/query-record", query)(client)
+    return APIsRequest{Data{Rows{QueryRecordData}}}("GET", "v5/asset/deposit/query-record", query)(client)
 end
 
 function query_record(client::BybitClient; kw...)

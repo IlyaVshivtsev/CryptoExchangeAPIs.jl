@@ -120,7 +120,7 @@ result = Bybit.V5.Execution.list(
 ```
 """
 function list(client::BybitClient, query::ListQuery)
-    return APIsRequest{Data{ListResult{ListData}}}("GET", "/v5/execution/list", query)(client)
+    return APIsRequest{Data{ListResult{ListData}}}("GET", "v5/execution/list", query)(client)
 end
 
 function list(client::BybitClient; kw...)

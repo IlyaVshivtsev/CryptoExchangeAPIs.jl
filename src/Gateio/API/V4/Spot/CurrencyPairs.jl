@@ -61,7 +61,7 @@ result = Gateio.API.V4.Spot.currency_pair(;
 ```
 """
 function currency_pair(client::GateioClient, query::CurrencyPairQuery)
-    end_piont = "/api/v4/spot/currency_pairs/$(query.currency_pair)"
+    end_piont = "api/v4/spot/currency_pairs/$(query.currency_pair)"
     return APIsRequest{CurrencyPairData}("GET", end_piont, query)(client)
 end
 
@@ -89,7 +89,7 @@ result = Gateio.API.V4.Spot.currency_pairs()
 ```
 """
 function currency_pairs(client::GateioClient, query::CurrencyPairsQuery)
-    end_piont = "/api/v4/spot/currency_pairs"
+    end_piont = "api/v4/spot/currency_pairs"
     return APIsRequest{Vector{CurrencyPairData}}("GET", end_piont, query)(client)
 end
 

@@ -86,7 +86,7 @@ result = Bybit.V5.Market.kline(;
 ```
 """
 function kline(client::BybitClient, query::KlineQuery)
-    return APIsRequest{Data{List{KlineData}}}("GET", "/v5/market/kline", query)(client)
+    return APIsRequest{Data{List{KlineData}}}("GET", "v5/market/kline", query)(client)
 end
 
 function kline(client::BybitClient = Bybit.BybitClient(Bybit.public_config); kw...)
