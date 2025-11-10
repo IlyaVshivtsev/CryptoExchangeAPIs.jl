@@ -6,9 +6,12 @@ export AllProductsQuery,
 
 using Serde
 using Dates, NanoDates, TimeZones
+using EnumX
 
 using CryptoExchangeAPIs.Coinbase
 using CryptoExchangeAPIs: Maybe, APIsRequest
+
+@enumx Status online offline internal delisted
 
 Base.@kwdef struct AllProductsQuery <: CoinbasePublicQuery
     type::Maybe{String} = nothing
@@ -16,22 +19,22 @@ end
 
 struct AllProductsData <: CoinbaseData
     id::String
-    base_currency::Maybe{String}
-    quote_currency::Maybe{String}
-    quote_increment::Maybe{Float64}
-    base_increment::Maybe{Float64}
-    display_name::Maybe{String}
-    min_market_funds::Maybe{Float64}
-    margin_enabled::Maybe{Bool}
-    post_only::Maybe{Bool}
-    limit_only::Maybe{Bool}
-    cancel_only::Maybe{Bool}
-    status::Maybe{String}
+    base_currency::String
+    quote_currency::String
+    quote_increment::Float64
+    base_increment::Float64
+    display_name::String
+    min_market_funds::Float64
+    margin_enabled::Bool
+    post_only::Bool
+    limit_only::Bool
+    cancel_only::Bool
+    status::Status.T
     status_message::Maybe{String}
     trading_disabled::Maybe{Bool}
     fx_stablecoin::Maybe{Bool}
     max_slippage_percentage::Maybe{Float64}
-    auction_mode::Maybe{Bool}
+    auction_mode::Bool
     high_bid_limit_percentage::Maybe{Float64}
 end
 
