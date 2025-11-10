@@ -11,7 +11,7 @@ using EnumX
 using CryptoExchangeAPIs.Gateio
 using CryptoExchangeAPIs: Maybe, APIsRequest
 
-@enumx Settle btc usdt usd
+@enumx Settle btc usdt
 
 Base.@kwdef struct ContractsQuery <: GateioPublicQuery
     settle::Settle.T
