@@ -140,11 +140,11 @@ Then, to install CryptoExchangeAPIs, simply use the Julia package manager:
                 <td><a href="https://bhftbootcamp.github.io/CryptoExchangeAPIs.jl/stable/pages/Kucoin/#Futures">Futures</a></td>
             </tr>
             <tr>
-                <td><img src="assets/okex.png" alt="Okex Logo" width="20" height="20"></td>
-                <td><a href="https://www.okx.com/">Okex</a></td>
+                <td><img src="assets/okex.png" alt="Okx Logo" width="20" height="20"></td>
+                <td><a href="https://www.okx.com/">Okx</a></td>
                 <td><a href="https://www.okx.com/docs-v5/en/">Spot</a></td>
-                <td><a href="src/Okex/Spot">CryptoExchangeAPIs.Okex.Spot</a></td>
-                <td><a href="https://bhftbootcamp.github.io/CryptoExchangeAPIs.jl/stable/pages/Okex/#Spot">Spot</a></td>
+                <td><a href="src/Okx/Spot">CryptoExchangeAPIs.Okx.Spot</a></td>
+                <td><a href="https://bhftbootcamp.github.io/CryptoExchangeAPIs.jl/stable/pages/Okx/#Spot">Spot</a></td>
             </tr>
             <tr>
                 <td><img src="assets/poloniex.png" alt="Poloniex Logo" width="20" height="20"></td>

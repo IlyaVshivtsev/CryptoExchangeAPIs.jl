@@ -8,10 +8,17 @@ export AevoCommonQuery,
     AevoData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig,
+    RequestOptions
 
 abstract type AevoData <: AbstractAPIsData end
 abstract type AevoCommonQuery  <: AbstractAPIsQuery end
@@ -19,9 +26,9 @@ abstract type AevoPublicQuery  <: AevoCommonQuery end
 abstract type AevoAccessQuery  <: AevoCommonQuery end
 
 """
-AevoClient <: AbstractAPIsClient
+    AevoConfig <: AbstractAPIsConfig
 
-Client info.
+Aevo client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client. 
@@ -29,20 +36,59 @@ Client info.
 ## Optional fields
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
-Base.@kwdef struct AevoClient <: AbstractAPIsClient
+Base.@kwdef struct AevoConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
+
+"""
+    AevoClient <: AbstractAPIsClient
+
+Client for interacting with Aevo exchange API.
+
+## Fields
+- `config::AevoConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
+"""
+mutable struct AevoClient <: AbstractAPIsClient
+    config::AevoConfig
+    curl_client::CurlClient
+
+    function AevoClient(config::AevoConfig)
+        new(config, CurlClient())
+    end
+
+    function AevoClient(; kw...)
+        return AevoClient(AevoConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::AevoClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::AevoClient) = isopen(c.curl_client)
+
+"""
+    close(client::AevoClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::AevoClient) = close(c.curl_client)
+
+"""
+    public_config = AevoConfig(; base_url = "https://api.aevo.xyz")
+"""
+const public_config = AevoConfig(; base_url = "https://api.aevo.xyz")
 
 """
     AevoAPIError{T} <: AbstractAPIsError
@@ -87,7 +133,10 @@ end
 include("Utils.jl")
 include("Errors.jl")
 
-include("Futures/Futures.jl")
-using .Futures
+include("FundingHistory.jl")
+using .FundingHistory
+
+include("Statistics.jl")
+using .Statistics
 
 end

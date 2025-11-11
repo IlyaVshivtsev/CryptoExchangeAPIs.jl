@@ -9,10 +9,17 @@ export CryptocomCommonQuery,
     CryptocomData
 
 using Serde
-using Dates, NanoDates, Base64, Nettle
+using Dates, NanoDates, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-using ..CryptoExchangeAPIs: Maybe,  AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig,
+    RequestOptions
 
 abstract type CryptocomData <: AbstractAPIsData end
 abstract type CryptocomCommonQuery <: AbstractAPIsQuery end
@@ -37,9 +44,9 @@ struct Data{D<:AbstractAPIsData} <: AbstractAPIsData
 end
 
 """
-    CryptocomClient <: AbstractAPIsClient
+    CryptocomConfig <: AbstractAPIsConfig
 
-Client info.
+Crypto.com client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -47,20 +54,59 @@ Client info.
 ## Optional fields
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
-Base.@kwdef struct CryptocomClient <: AbstractAPIsClient
+Base.@kwdef struct CryptocomConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
+
+"""
+    CryptocomClient <: AbstractAPIsClient
+
+Client for interacting with Crypto.com exchange API.
+
+## Fields
+- `config::CryptocomConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
+"""
+mutable struct CryptocomClient <: AbstractAPIsClient
+    config::CryptocomConfig
+    curl_client::CurlClient
+
+    function CryptocomClient(config::CryptocomConfig)
+        new(config, CurlClient())
+    end
+
+    function CryptocomClient(; kw...)
+        return CryptocomClient(CryptocomConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::CryptocomClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::CryptocomClient) = isopen(c.curl_client)
+
+"""
+    close(client::CryptocomClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::CryptocomClient) = close(c.curl_client)
+
+"""
+    public_config = CryptocomConfig(; base_url = "https://api.crypto.com/exchange/v1")
+"""
+const public_config = CryptocomConfig(; base_url = "https://api.crypto.com/exchange/v1")
 
 """
     CryptocomAPIError{T} <: AbstractAPIsError
@@ -109,13 +155,12 @@ end
 
 function CryptoExchangeAPIs.request_headers(client::CryptocomClient, ::CryptocomPublicQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "Content-Type" => "application/json"
+        "Content-Type" => "application/json",
     ]
 end
 
 include("Utils.jl")
 
-include("Spot/Spot.jl")
-using .Spot
+include("Public/Public.jl")
 
 end

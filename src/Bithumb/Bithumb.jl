@@ -9,10 +9,17 @@ export BithumbCommonQuery,
     BithumbData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig,
+    RequestOptions
 
 abstract type BithumbData <: AbstractAPIsData end
 abstract type BithumbCommonQuery  <: AbstractAPIsQuery end
@@ -37,9 +44,9 @@ struct Data{D<:Union{A,Vector{A},Dict{String,A}} where {A<:AbstractAPIsData}} <:
 end
 
 """
-    BithumbClient <: AbstractAPIsClient
+    BithumbConfig <: AbstractAPIsConfig
 
-Client info.
+Bithumb client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client. 
@@ -47,20 +54,59 @@ Client info.
 ## Optional fields
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
-Base.@kwdef struct BithumbClient <: AbstractAPIsClient
+Base.@kwdef struct BithumbConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
+
+"""
+    BithumbClient <: AbstractAPIsClient
+
+Client for interacting with Bithumb exchange API.
+
+## Fields
+- `config::BithumbConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
+"""
+mutable struct BithumbClient <: AbstractAPIsClient
+    config::BithumbConfig
+    curl_client::CurlClient
+
+    function BithumbClient(config::BithumbConfig)
+        new(config, CurlClient())
+    end
+
+    function BithumbClient(; kw...)
+        return BithumbClient(BithumbConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::BithumbClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::BithumbClient) = isopen(c.curl_client)
+
+"""
+    close(client::BithumbClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::BithumbClient) = close(c.curl_client)
+
+"""
+    public_config = BithumbConfig(; base_url = "https://api.bithumb.com")
+"""
+const public_config = BithumbConfig(; base_url = "https://api.bithumb.com")
 
 """
     BithumbAPIError{T} <: AbstractAPIsError
@@ -98,7 +144,7 @@ function CryptoExchangeAPIs.request_sign!(client::BithumbClient, query::Q, endpo
     query.signature = nothing
     body = Serde.to_query(query)
     salt = string("/", endpoint, Char(0), body, Char(0), round(Int64, 1000 * datetime2unix(query.nonce)))
-    query.signature = Base64.base64encode(hexdigest("sha512", client.secret_key, salt))
+    query.signature = Base64.base64encode(hexdigest("sha512", client.config.secret_key, salt))
     return query
 end
 
@@ -122,7 +168,7 @@ end
 
 function CryptoExchangeAPIs.request_headers(client::BithumbClient, query::BithumbPrivateQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "Api-Key"   => client.public_key,
+        "Api-Key"   => client.config.public_key,
         "Api-Sign"  => query.signature,
         "Api-Nonce" => string(round(Int64, 1000 * datetime2unix(query.nonce))),
     ]
@@ -131,7 +177,13 @@ end
 include("Utils.jl")
 include("Errors.jl")
 
-include("Spot/Spot.jl")
-using .Spot
+include("Public/Public.jl")
+using .Public
+
+include("V1/V1.jl")
+using .V1
+
+include("Info/Info.jl")
+using .Info
 
 end

@@ -9,10 +9,17 @@ export GateioCommonQuery,
     GateioData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig,
+    RequestOptions
 
 abstract type GateioData <: AbstractAPIsData end
 abstract type GateioCommonQuery  <: AbstractAPIsQuery end
@@ -21,9 +28,9 @@ abstract type GateioAccessQuery  <: GateioCommonQuery end
 abstract type GateioPrivateQuery <: GateioCommonQuery end
 
 """
-    GateioClient <: AbstractAPIsClient
+    GateioConfig <: AbstractAPIsConfig
 
-Client info.
+Gate.io client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -31,20 +38,59 @@ Client info.
 ## Optional fields
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
-Base.@kwdef struct GateioClient <: AbstractAPIsClient
+Base.@kwdef struct GateioConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
+
+"""
+    GateioClient <: AbstractAPIsClient
+
+Client for interacting with Gate.io exchange API.
+
+## Fields
+- `config::GateioConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
+"""
+mutable struct GateioClient <: AbstractAPIsClient
+    config::GateioConfig
+    curl_client::CurlClient
+
+    function GateioClient(config::GateioConfig)
+        new(config, CurlClient())
+    end
+
+    function GateioClient(; kw...)
+        return GateioClient(GateioConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::GateioClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::GateioClient) = isopen(c.curl_client)
+
+"""
+    close(client::GateioClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::GateioClient) = close(c.curl_client)
+
+"""
+    public_config = GateioConfig(; base_url = "https://api.gateio.ws")
+"""
+const public_config = GateioConfig(; base_url = "https://api.gateio.ws")
 
 """
     GateioAPIError{T} <: AbstractAPIsError
@@ -86,7 +132,7 @@ function CryptoExchangeAPIs.request_sign!(client::GateioClient, query::Q, endpoi
     query.signTimestamp = Dates.now(UTC)
     query.signature = nothing
     endpoint = "/" * endpoint
-    query.signature = hexdigest("sha512", client.secret_key, gen_sign("GET", query, endpoint))
+    query.signature = hexdigest("sha512", client.config.secret_key, gen_sign("GET", query, endpoint))
     return query
 end
 
@@ -100,13 +146,13 @@ end
 
 function CryptoExchangeAPIs.request_headers(client::GateioClient, ::GateioPublicQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "Content-Type" => "application/json"
+        "Content-Type" => "application/json",
     ]
 end
 
 function CryptoExchangeAPIs.request_headers(client::GateioClient, query::GateioPrivateQuery)::Vector{Pair{String,String}}
     return Pair{String,String}[
-        "KEY"          => client.public_key,
+        "KEY"          => client.config.public_key,
         "SIGN"         => query.signature,
         "Timestamp"    => string(round(Int64, datetime2unix(query.signTimestamp))),
         "Content-Type" => "application/json",
@@ -116,10 +162,7 @@ end
 include("Utils.jl")
 include("Errors.jl")
 
-include("Spot/Spot.jl")
-using .Spot
-
-include("Futures/Futures.jl")
-using .Futures
+include("API/API.jl")
+using .API
 
 end

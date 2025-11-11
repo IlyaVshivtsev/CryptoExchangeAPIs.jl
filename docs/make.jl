@@ -28,7 +28,7 @@ makedocs(;
         "pages/Huobi.md",
         "pages/Kraken.md",
         "pages/Kucoin.md",
-        "pages/Okex.md",
+        "pages/Okx.md",
         "pages/Poloniex.md",
         "pages/Upbit.md",
         "For Developers" => [

@@ -9,10 +9,17 @@ export HuobiCommonQuery,
     HuobiData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
+using EnumX
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError,
+    AbstractAPIsData,
+    AbstractAPIsQuery,
+    AbstractAPIsClient,
+    AbstractAPIsConfig,
+    RequestOptions
 
 abstract type HuobiData <: AbstractAPIsData end
 abstract type HuobiCommonQuery  <: AbstractAPIsQuery end
@@ -20,7 +27,7 @@ abstract type HuobiPublicQuery  <: HuobiCommonQuery end
 abstract type HuobiAccessQuery  <: HuobiCommonQuery end
 abstract type HuobiPrivateQuery <: HuobiCommonQuery end
 
-@enum Status begin
+@enumx Status begin
     ok
     error
 end
@@ -38,7 +45,7 @@ end
 - `code::Int64`: Response code.
 """
 struct Data{D} <: AbstractAPIsData
-    status::Maybe{Status}
+    status::Maybe{Status.T}
     ch::Maybe{String}
     ts::Maybe{NanoDate}
     code::Maybe{Int64}
@@ -55,16 +62,16 @@ end
 - `ts::NanoDate`: The UTC timestamp when API respond.
 """
 struct DataTick{D} <: AbstractAPIsData
-    status::Status
+    status::Status.T
     ch::String
     ts::NanoDate
     tick::D
 end
 
 """
-    HuobiClient <: AbstractAPIsClient
+    HuobiConfig <: AbstractAPIsConfig
 
-Client info.
+Huobi client config. Transport options live in `request_options::RequestOptions`.
 
 ## Required fields
 - `base_url::String`: Base URL for the client.
@@ -72,20 +79,59 @@ Client info.
 ## Optional fields
 - `public_key::String`: Public key for authentication.
 - `secret_key::String`: Secret key for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
 - `account_name::String`: Account name associated with the client.
 - `description::String`: Description of the client.
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
-Base.@kwdef struct HuobiClient <: AbstractAPIsClient
+Base.@kwdef struct HuobiConfig <: AbstractAPIsConfig
     base_url::String
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
+
+"""
+    HuobiClient <: AbstractAPIsClient
+
+Client for interacting with Huobi exchange API.
+
+## Fields
+- `config::HuobiConfig`: Configuration with base URL, API keys, and settings
+- `curl_client::CurlClient`: HTTP client for API requests
+"""
+mutable struct HuobiClient <: AbstractAPIsClient
+    config::HuobiConfig
+    curl_client::CurlClient
+
+    function HuobiClient(config::HuobiConfig)
+        new(config, CurlClient())
+    end
+
+    function HuobiClient(; kw...)
+        return HuobiClient(HuobiConfig(; kw...))
+    end
+end
+
+"""
+    isopen(client::HuobiClient) -> Bool
+
+Checks if the `client` instance is open and ready for API requests.
+"""
+Base.isopen(c::HuobiClient) = isopen(c.curl_client)
+
+"""
+    close(client::HuobiClient)
+
+Closes the `client` instance and free associated resources.
+"""
+Base.close(c::HuobiClient) = close(c.curl_client)
+
+"""
+    public_config = HuobiConfig(; base_url = "https://api.huobi.pro")
+"""
+const public_config = HuobiConfig(; base_url = "https://api.huobi.pro")
 
 """
     HuobiAPIError{T} <: AbstractAPIsError
@@ -125,16 +171,16 @@ function CryptoExchangeAPIs.request_sign!(::HuobiClient, query::Q, ::String)::Q 
 end
 
 function CryptoExchangeAPIs.request_sign!(client::HuobiClient, query::Q, endpoint::String)::Nothing where {Q<:HuobiPrivateQuery}
-    query.AccessKeyId = client.public_key
+    query.AccessKeyId = client.config.public_key
     query.Timestamp = now(UTC)
     query.SignatureMethod = "HmacSHA256"
     query.SignatureVersion  = "2"
     query.Signature = nothing
     body::String = Serde.to_query(query)
     endpoint = string("/", endpoint)
-    host = last(split(client.base_url, "//"))
+    host = last(split(client.config.base_url, "//"))
     salt = join(["GET", host, endpoint, body], "\n")
-    query.Signature = Base64.base64encode(digest("sha256", client.secret_key, salt))
+    query.Signature = Base64.base64encode(digest("sha256", client.config.secret_key, salt))
     return nothing
 end
 
@@ -163,7 +209,8 @@ end
 include("Utils.jl")
 include("Errors.jl")
 
-include("Spot/Spot.jl")
-using .Spot
+include("Market/Market.jl")
+include("V1/V1.jl")
+include("V2/V2.jl")
 
 end

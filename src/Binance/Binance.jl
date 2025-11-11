@@ -1,18 +1,22 @@
 module Binance
 
 export BinanceCommonQuery,
-    BinancePublicQuery,
-    BinanceAccessQuery,
-    BinancePrivateQuery,
-    BinanceAPIError,
-    BinanceClient,
-    BinanceData
+       BinancePublicQuery,
+       BinanceAccessQuery,
+       BinancePrivateQuery,
+       BinanceAPIError,
+       BinanceClient,
+       BinanceConfig,
+       BinanceData
 
 using Serde
-using Dates, NanoDates, TimeZones, Base64, Nettle
-
+using Dates, NanoDates, TimeZones, Base64, Nettle, EasyCurl
 using ..CryptoExchangeAPIs
-import ..CryptoExchangeAPIs: Maybe, AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery, AbstractAPIsClient
+import ..CryptoExchangeAPIs: Maybe,
+    AbstractAPIsError, AbstractAPIsData, AbstractAPIsQuery,
+    AbstractAPIsClient, AbstractAPIsConfig, RequestOptions
+
+# ---------------------------------------------------------------------------
 
 abstract type BinanceData <: AbstractAPIsData end
 abstract type BinanceCommonQuery  <: AbstractAPIsQuery end
@@ -21,113 +25,142 @@ abstract type BinanceAccessQuery  <: BinanceCommonQuery end
 abstract type BinancePrivateQuery <: BinanceCommonQuery end
 
 """
-    BinanceClient <: AbstractAPIsClient
+    BinanceConfig <: AbstractAPIsConfig
 
-Client info.
+Binance client config. Transport options live in `request_options::RequestOptions`.
 
-## Required fields
-- `base_url::String`: Base URL for the client. 
+Required:
+- `base_url::String`
 
-## Optional fields
-- `public_key::String`: Public key for authentication.
-- `secret_key::String`: Secret key for authentication.
-- `interface::String`: Interface for the client.
-- `proxy::String`: Proxy information for the client.
-- `account_name::String`: Account name associated with the client.
-- `description::String`: Description of the client.
+Optional:
+- `public_key::String`
+- `secret_key::String`
+- `account_name::String`
+- `description::String`
+- `request_options::RequestOptions` (interface/proxy/timeouts)
 """
-Base.@kwdef struct BinanceClient <: AbstractAPIsClient
-    base_url::String
+Base.@kwdef struct BinanceConfig <: AbstractAPIsConfig
+    base_url::String = "https://api.binance.com"
     public_key::Maybe{String} = nothing
     secret_key::Maybe{String} = nothing
-    interface::Maybe{String} = nothing
-    proxy::Maybe{String} = nothing
     account_name::Maybe{String} = nothing
     description::Maybe{String} = nothing
+    request_options::RequestOptions = RequestOptions()
 end
 
-"""
-    BinanceAPIError{T} <: AbstractAPIsError
+mutable struct BinanceClient <: AbstractAPIsClient
+    config::BinanceConfig
+    curl_client::CurlClient
+    function BinanceClient(config::BinanceConfig)
+        new(config, CurlClient())
+    end
+    function BinanceClient(; kw...)
+        BinanceClient(BinanceConfig(; kw...))
+    end
+end
 
-Exception thrown when an API method fails with code `T`.
+Base.isopen(c::BinanceClient) = isopen(c.curl_client)
+Base.close(c::BinanceClient)  = close(c.curl_client)
 
-## Required fields
-- `code::Int64`: Error code.
+const public_config      = BinanceConfig(; base_url = "https://api.binance.com")
+const public_fapi_config = BinanceConfig(; base_url = "https://fapi.binance.com")
+const public_dapi_config = BinanceConfig(; base_url = "https://dapi.binance.com")
 
-## Optional fields
-- `type::String`: Type of error.
-- `msg::String`: Error message.
-"""
+# ---------------------------------------------------------------------------
+
 struct BinanceAPIError{T} <: AbstractAPIsError
     code::Int64
     type::Maybe{String}
     msg::Maybe{String}
-
     function BinanceAPIError(code::Int64, x...)
-        return new{code}(code, x...)
+        new{code}(code, x...)
     end
 end
 
 CryptoExchangeAPIs.error_type(::BinanceClient) = BinanceAPIError
 
 function Base.show(io::IO, e::BinanceAPIError)
-    return print(io, "code = ", "\"", e.code, "\"", ", ", "msg = ", "\"", e.msg, "\"")
+    print(io, "code=\"", e.code, "\", msg=\"", e.msg, "\"")
 end
 
-function CryptoExchangeAPIs.request_sign!(::BinanceClient, query::Q, ::String)::Q where {Q<:BinancePublicQuery}
-    return query
+# --- signing ---------------------------------------------------------------
+
+function CryptoExchangeAPIs.request_sign!(
+    ::BinanceClient,
+    query::Q,
+    ::AbstractString
+) where {Q<:BinancePublicQuery}
+    query
 end
 
-function CryptoExchangeAPIs.request_sign!(client::BinanceClient, query::Q, ::String)::Q where {Q<:BinancePrivateQuery}
+function CryptoExchangeAPIs.request_sign!(
+    client::BinanceClient,
+    query::Q,
+    ::AbstractString
+) where {Q<:BinancePrivateQuery}
+    if client.config.secret_key === nothing
+        throw(ArgumentError("secret_key is required for Binance private endpoints"))
+    end
     query.timestamp = Dates.now(UTC)
     query.signature = nothing
     str_query = Serde.to_query(query)
-    query.signature = hexdigest("sha256", client.secret_key, str_query)
-    return query
+    query.signature = hexdigest("sha256", client.config.secret_key::String, str_query)
+    query
 end
 
-function CryptoExchangeAPIs.request_sign!(::BinanceClient, query::Q, ::String)::Q where {Q<:BinanceAccessQuery}
-    return query
+function CryptoExchangeAPIs.request_sign!(
+    ::BinanceClient,
+    query::Q,
+    ::AbstractString
+) where {Q<:BinanceAccessQuery}
+    query
 end
 
-function CryptoExchangeAPIs.request_body(::Q)::String where {Q<:BinanceCommonQuery}
-    return ""
+# --- body/query ------------------------------------------------------------
+
+CryptoExchangeAPIs.request_body(::Q) where {Q<:BinanceCommonQuery} = ""
+CryptoExchangeAPIs.request_query(query::Q) where {Q<:BinanceCommonQuery} = Serde.to_query(query)
+
+# --- headers ---------------------------------------------------------------
+
+function CryptoExchangeAPIs.request_headers(
+    ::BinanceClient,
+    ::BinancePublicQuery
+)
+    Pair{String,String}["Content-Type" => "application/json"]
 end
 
-function CryptoExchangeAPIs.request_query(query::Q)::String where {Q<:BinanceCommonQuery}
-    return Serde.to_query(query)
+function CryptoExchangeAPIs.request_headers(
+    client::BinanceClient,
+    ::BinancePrivateQuery
+)
+    h = Pair{String,String}["Content-Type" => "application/json"]
+    if client.config.public_key !== nothing
+        push!(h, "X-MBX-APIKEY" => client.config.public_key::String)
+    end
+    h
 end
 
-function CryptoExchangeAPIs.request_headers(client::BinanceClient, ::BinancePublicQuery)::Vector{Pair{String,String}}
-    return Pair{String,String}[
-        "Content-Type" => "application/json",
-    ]
+function CryptoExchangeAPIs.request_headers(
+    client::BinanceClient,
+    ::BinanceAccessQuery
+)
+    h = Pair{String,String}["Content-Type" => "application/json"]
+    if client.config.public_key !== nothing
+        push!(h, "X-MBX-APIKEY" => client.config.public_key::String)
+    end
+    h
 end
 
-function CryptoExchangeAPIs.request_headers(client::BinanceClient, ::BinancePrivateQuery)::Vector{Pair{String,String}}
-    return Pair{String,String}[
-        "Content-Type" => "application/json",
-        "X-MBX-APIKEY" => client.public_key,
-    ]
-end
-
-function CryptoExchangeAPIs.request_headers(client::BinanceClient, ::BinanceAccessQuery)::Vector{Pair{String,String}}
-    return Pair{String,String}[
-        "Content-Type" => "application/json",
-        "X-MBX-APIKEY" => client.public_key,
-    ]
-end
+# --- rest ------------------------------------------------------------------
 
 include("Utils.jl")
 include("Errors.jl")
 
-include("CoinMFutures/CoinMFutures.jl")
-using .CoinMFutures
-
-include("USDMFutures/USDMFutures.jl")
-using .USDMFutures
-
-include("Spot/Spot.jl")
-using .Spot
+include("API/API.jl");     using .API
+include("SAPI/SAPI.jl");   using .SAPI
+include("FAPI/FAPI.jl");   using .FAPI
+include("DAPI/DAPI.jl");   using .DAPI
+include("Futures/Futures.jl"); using .Futures
 
 end
