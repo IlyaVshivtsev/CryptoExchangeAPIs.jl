@@ -34,12 +34,12 @@ abstract type OkxPrivateQuery <: OkxCommonQuery end
 - `code::Int64`: Return code.
 - `data::Vector{D}`: Result values.
 """
-struct Data{D<:AbstractAPIsData} <: AbstractAPIsData
+struct Data{D} <: AbstractAPIsData
     msg::String
     code::Int64
     data::Vector{D}
 
-    function Data{D}(msg::String, code::Int64, data::Vector{D}) where {D <: AbstractAPIsData}
+    function Data{D}(msg::String, code::Int64, data::Vector{D}) where {D}
         @assert code == 0
         return new{D}(msg, code, data)
     end
