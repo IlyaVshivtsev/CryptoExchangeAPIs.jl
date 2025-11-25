@@ -48,6 +48,8 @@ Base.@kwdef struct BinanceConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{BinanceConfig}, ::Val{:request_options}) = RequestOptions()
+
 mutable struct BinanceClient <: AbstractAPIsClient
     config::BinanceConfig
     curl_client::CurlClient

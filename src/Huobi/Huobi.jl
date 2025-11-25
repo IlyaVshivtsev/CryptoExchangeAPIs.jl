@@ -92,6 +92,8 @@ Base.@kwdef struct HuobiConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{HuobiConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     HuobiClient <: AbstractAPIsClient
 

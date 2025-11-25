@@ -52,6 +52,8 @@ Base.@kwdef struct UpbitConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{UpbitConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     UpbitClient <: AbstractAPIsClient
 

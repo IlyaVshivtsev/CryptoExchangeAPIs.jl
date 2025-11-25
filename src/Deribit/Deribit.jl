@@ -75,6 +75,8 @@ Base.@kwdef struct DeribitConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{DeribitConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     DeribitClient <: AbstractAPIsClient
 

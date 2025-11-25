@@ -51,6 +51,8 @@ Base.@kwdef struct GateioConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{GateioConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     GateioClient <: AbstractAPIsClient
 

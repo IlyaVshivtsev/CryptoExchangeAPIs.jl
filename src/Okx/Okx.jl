@@ -71,6 +71,8 @@ Base.@kwdef struct OkxConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{OkxConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     OkxClient <: AbstractAPIsClient
 

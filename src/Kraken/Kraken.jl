@@ -62,6 +62,8 @@ Base.@kwdef struct KrakenConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{KrakenConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     KrakenClient <: AbstractAPIsClient
 

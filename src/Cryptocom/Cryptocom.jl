@@ -67,6 +67,8 @@ Base.@kwdef struct CryptocomConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{CryptocomConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     CryptocomClient <: AbstractAPIsClient
 

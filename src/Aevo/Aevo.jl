@@ -49,6 +49,8 @@ Base.@kwdef struct AevoConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{AevoConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     AevoClient <: AbstractAPIsClient
 

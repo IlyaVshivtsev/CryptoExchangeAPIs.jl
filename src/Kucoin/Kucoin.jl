@@ -82,6 +82,8 @@ Base.@kwdef struct KucoinConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{KucoinConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     KucoinClient <: AbstractAPIsClient
 

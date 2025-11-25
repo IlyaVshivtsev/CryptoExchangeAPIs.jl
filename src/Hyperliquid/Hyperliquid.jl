@@ -43,6 +43,8 @@ Base.@kwdef struct HyperliquidConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{HyperliquidConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     HyperliquidClient <: AbstractAPIsClient
 

@@ -51,6 +51,8 @@ Base.@kwdef struct BitfinexConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{BitfinexConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     BitfinexClient <: AbstractAPIsClient
 

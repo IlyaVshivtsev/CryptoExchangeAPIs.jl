@@ -67,6 +67,8 @@ Base.@kwdef struct BithumbConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{BithumbConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     BithumbClient <: AbstractAPIsClient
 

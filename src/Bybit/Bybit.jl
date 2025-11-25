@@ -98,6 +98,8 @@ Base.@kwdef struct BybitConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{BybitConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     BybitClient <: AbstractAPIsClient
 

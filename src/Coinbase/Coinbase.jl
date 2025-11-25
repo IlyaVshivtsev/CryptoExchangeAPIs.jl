@@ -53,6 +53,8 @@ Base.@kwdef struct CoinbaseConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{CoinbaseConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     CoinbaseClient <: AbstractAPIsClient
 

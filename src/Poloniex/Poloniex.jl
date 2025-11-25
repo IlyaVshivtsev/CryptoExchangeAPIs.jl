@@ -51,6 +51,8 @@ Base.@kwdef struct PoloniexConfig <: AbstractAPIsConfig
     request_options::RequestOptions = RequestOptions()
 end
 
+Serde.default_value(::Type{PoloniexConfig}, ::Val{:request_options}) = RequestOptions()
+
 """
     PoloniexClient <: AbstractAPIsClient
 
