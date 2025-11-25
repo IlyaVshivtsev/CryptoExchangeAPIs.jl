@@ -12,4 +12,7 @@ using .Orderbook
 include("Tickers.jl")
 using .Tickers
 
+include("Insurance.jl")
+using .Insurance
+
 end

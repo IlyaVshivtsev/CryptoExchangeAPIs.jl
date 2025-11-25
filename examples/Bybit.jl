@@ -56,6 +56,11 @@ Bybit.V5.Market.orderbook(;
     limit = 25
 )
 
+Bybit.V5.Market.insurance()
+
+Bybit.V5.Market.insurance(; coin = "BTC")
+
+
 Bybit.V5.Asset.Coin.query_info(bybit_client)
 
 Bybit.V5.Asset.Coin.query_info(bybit_client; coin = "BTC")

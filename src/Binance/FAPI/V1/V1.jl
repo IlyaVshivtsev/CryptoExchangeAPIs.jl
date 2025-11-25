@@ -24,4 +24,7 @@ using .PremiumIndex
 include("Ticker24hr.jl")
 using .Ticker24hr
 
+include("InsuranceBalance.jl")
+using .InsuranceBalance
+
 end
