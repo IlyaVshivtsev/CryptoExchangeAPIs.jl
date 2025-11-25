@@ -137,6 +137,10 @@ Binance.FAPI.V1.premium_index(; symbol = "BTCUSDT")
 
 Binance.FAPI.V1.ticker24hr(; symbol = "BTCUSDT")
 
+Binance.FAPI.V1.insurance_balance()
+
+Binance.FAPI.V1.insurance_balance(; symbol = "BTCUSDT")
+
 
 Binance.Futures.Data.global_long_short_account_ratio(;
     symbol = "BTCUSDT",
