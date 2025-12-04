@@ -60,6 +60,8 @@ function Serde.deser(::Type{Chain}, ::Type{ChainStatus.T}, x::Int64)
     return ChainStatus.T(x)
 end
 
+Serde.isempty(::Type{Chain}, x::AbstractString) = isempty(x)
+
 """
     query_info(client::BybitClient, query::QueryInfoQuery)
     query_info(client::BybitClient; kw...)
