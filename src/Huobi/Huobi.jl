@@ -5,6 +5,7 @@ export HuobiCommonQuery,
     HuobiAccessQuery,
     HuobiPrivateQuery,
     HuobiAPIError,
+    HuobiConfig,
     HuobiClient,
     HuobiData
 

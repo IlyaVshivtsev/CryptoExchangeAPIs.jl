@@ -5,6 +5,7 @@ export BitfinexCommonQuery,
     BitfinexAccessQuery,
     BitfinexPrivateQuery,
     BitfinexAPIError,
+    BitfinexConfig,
     BitfinexClient,
     BitfinexData
 

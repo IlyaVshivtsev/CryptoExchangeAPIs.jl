@@ -3,6 +3,7 @@ module Hyperliquid
 export HyperliquidCommonQuery,
     HyperliquidPublicQuery,
     HyperliquidAPIError,
+    HyperliquidConfig,
     HyperliquidClient,
     HyperliquidData
 

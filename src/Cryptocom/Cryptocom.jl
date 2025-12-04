@@ -5,6 +5,7 @@ export CryptocomCommonQuery,
     CryptocomAccessQuery,
     CryptocomPrivateQuery,
     CryptocomAPIError,
+    CryptocomConfig,
     CryptocomClient,
     CryptocomData
 

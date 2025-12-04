@@ -5,6 +5,7 @@ export GateioCommonQuery,
     GateioAccessQuery,
     GateioPrivateQuery,
     GateioAPIError,
+    GateioConfig,
     GateioClient,
     GateioData
 

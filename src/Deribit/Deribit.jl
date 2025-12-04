@@ -5,6 +5,7 @@ export DeribitCommonQuery,
     DeribitAccessQuery,
     DeribitPrivateQuery,
     DeribitAPIError,
+    DeribitConfig,
     DeribitClient,
     DeribitData
 

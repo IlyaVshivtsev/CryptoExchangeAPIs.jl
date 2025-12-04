@@ -5,6 +5,7 @@ export PoloniexCommonQuery,
     PoloniexAccessQuery,
     PoloniexPrivateQuery,
     PoloniexAPIError,
+    PoloniexConfig,
     PoloniexClient,
     PoloniexData
 

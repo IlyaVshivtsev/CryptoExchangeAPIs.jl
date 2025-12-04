@@ -5,6 +5,7 @@ export BithumbCommonQuery,
     BithumbAccessQuery,
     BithumbPrivateQuery,
     BithumbAPIError,
+    BithumbConfig,
     BithumbClient,
     BithumbData
 

@@ -5,6 +5,7 @@ export UpbitCommonQuery,
     UpbitAccessQuery,
     UpbitPrivateQuery,
     UpbitAPIError,
+    UpbitConfig,
     UpbitClient,
     UpbitData
 

@@ -5,6 +5,7 @@ export KucoinCommonQuery,
     KucoinAccessQuery,
     KucoinPrivateQuery,
     KucoinAPIError,
+    KucoinConfig,
     KucoinClient,
     KucoinData
 

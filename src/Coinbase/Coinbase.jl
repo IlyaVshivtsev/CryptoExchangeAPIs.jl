@@ -5,6 +5,7 @@ export CoinbaseCommonQuery,
     CoinbaseAccessQuery,
     CoinbasePrivateQuery,
     CoinbaseAPIError,
+    CoinbaseConfig,
     CoinbaseClient,
     CoinbaseData
 

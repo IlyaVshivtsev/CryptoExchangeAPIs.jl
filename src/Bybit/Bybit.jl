@@ -5,6 +5,7 @@ export BybitCommonQuery,
     BybitAccessQuery,
     BybitPrivateQuery,
     BybitAPIError,
+    BybitConfig,
     BybitClient,
     BybitData
 
