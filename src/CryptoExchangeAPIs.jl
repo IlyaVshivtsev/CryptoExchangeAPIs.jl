@@ -228,6 +228,7 @@ end
 include("Aevo/Aevo.jl")
 include("Binance/Binance.jl")
 include("Bitfinex/Bitfinex.jl")
+include("Bitget/Bitget.jl")
 include("Bithumb/Bithumb.jl")
 include("Bybit/Bybit.jl")
 include("Coinbase/Coinbase.jl")
