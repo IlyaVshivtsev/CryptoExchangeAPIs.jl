@@ -4,6 +4,7 @@ export AevoCommonQuery,
     AevoPublicQuery,
     AevoAccessQuery,
     AevoAPIError,
+    AevoConfig,
     AevoClient,
     AevoData
 

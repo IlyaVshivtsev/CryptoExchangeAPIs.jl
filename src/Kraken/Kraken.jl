@@ -5,6 +5,7 @@ export KrakenCommonQuery,
     KrakenAccessQuery,
     KrakenPrivateQuery,
     KrakenAPIError,
+    KrakenConfig,
     KrakenClient,
     KrakenData
 

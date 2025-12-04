@@ -5,6 +5,7 @@ export OkxCommonQuery,
     OkxAccessQuery,
     OkxPrivateQuery,
     OkxAPIError,
+    OkxConfig,
     OkxClient,
     OkxData
 
