@@ -4,6 +4,8 @@ function Serde.deser(::Type{<:KrakenData}, ::Type{<:Maybe{NanoDate}}, x::Real)::
     return unixnanos2nanodate(x * 1e9)
 end
 
+Serde.deser(::Type{<:KrakenData}, ::Type{Date}, x::AbstractString) = Date(x, "yyyy-mm-dd")
+
 function Serde.deser(::Type{<:KrakenData}, ::Type{<:Maybe{NanoDate}}, x::AbstractString)::NanoDate
     return NanoDate(DateTime(x, "yyyy-mm-ddTHH:MM:SS.ssszzzz"))
 end

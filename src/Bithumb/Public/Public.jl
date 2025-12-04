@@ -1,6 +1,7 @@
 module Public
 
-include("AssetStatus/AssetStatus.jl")
+include("AssetsStatus/AssetsStatus.jl")
+using .AssetsStatus
 
 include("Candlestick.jl")
 using .Candlestick

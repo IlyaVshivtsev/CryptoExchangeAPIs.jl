@@ -43,7 +43,7 @@ Provides information on the deposit/withdrawal status of virtual assets.
 ```julia
 using CryptoExchangeAPIs.Bithumb
 
-result = Bithumb.Public.AssetStatus.Multichain.multichain(; 
+result = Bithumb.Public.AssetsStatus.Multichain.multichain(; 
     currency = "ADA",
 )
 ```
