@@ -1,4 +1,4 @@
-module AssetStatus
+module AssetsStatus
 
 include("Multichain.jl")
 using .Multichain

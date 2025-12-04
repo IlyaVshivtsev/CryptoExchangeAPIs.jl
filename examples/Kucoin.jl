@@ -82,3 +82,6 @@ Kucoin.API.V1.funding_history(
 Kucoin.API.V2.Symbols.all_symbols()
 
 Kucoin.API.V2.Symbols.symbol(; symbol = "BTC-USDT")
+
+
+Kucoin.API.V3.Currencies.get_all_currencies()

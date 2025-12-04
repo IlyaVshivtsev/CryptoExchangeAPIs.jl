@@ -84,24 +84,11 @@ mutable struct KrakenClient <: AbstractAPIsClient
     end
 end
 
-"""
-    isopen(client::KrakenClient) -> Bool
-
-Checks if the `client` instance is open and ready for API requests.
-"""
 Base.isopen(c::KrakenClient) = isopen(c.curl_client)
+Base.close(c::KrakenClient)  = close(c.curl_client)
 
-"""
-    close(client::KrakenClient)
-
-Closes the `client` instance and free associated resources.
-"""
-Base.close(c::KrakenClient) = close(c.curl_client)
-
-"""
-    public_config = KrakenConfig(; base_url = "https://api.kraken.com")
-"""
-const public_config = KrakenConfig(; base_url = "https://api.kraken.com")
+const public_config        = KrakenConfig(; base_url = "https://api.kraken.com")
+const public_status_config = KrakenConfig(; base_url = "https://status.kraken.com")
 
 """
     KrakenAPIError{T} <: AbstractAPIsError
@@ -177,5 +164,6 @@ include("Utils.jl")
 include("Errors.jl")
 
 include("V0/V0.jl")
+include("API/API.jl")
 
 end

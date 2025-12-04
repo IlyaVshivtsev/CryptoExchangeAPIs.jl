@@ -27,6 +27,7 @@ struct Network <: PoloniexData
     decimals::Float64
     withdrawFee::Float64
     minConfirm::Int64
+    contractAddress::Maybe{String}
 end
 
 struct CurrenciesData <: PoloniexData
@@ -65,4 +66,3 @@ function currencies(client::PoloniexClient = Poloniex.PoloniexClient(Poloniex.pu
 end
 
 end
-

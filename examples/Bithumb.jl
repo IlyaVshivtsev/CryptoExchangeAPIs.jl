@@ -13,9 +13,9 @@ client = BithumbClient(;
 )
 
 
-Bithumb.Public.AssetStatus.multichain()
+Bithumb.Public.AssetsStatus.multichain()
 
-Bithumb.Public.AssetStatus.multichain(; currency = "ADA")
+Bithumb.Public.AssetsStatus.multichain(; currency = "ADA")
 
 Bithumb.Public.candlestick(;
     order_currency = "BTC",

@@ -81,3 +81,5 @@ Kraken.V0.Private.ledgers(
     _end = now(UTC),
     ofs = 10
 )
+
+Kraken.API.V2.Components.components()
