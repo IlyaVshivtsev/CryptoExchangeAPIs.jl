@@ -29,22 +29,22 @@ end
 struct Chain <: BybitData
     chain::String
     chainType::String
-    confirmation::Int64
-    withdrawFee::Float64
-    depositMin::Float64
-    withdrawMin::Float64
+    confirmation::Maybe{Int64}
+    withdrawFee::Maybe{Float64}
+    depositMin::Maybe{Float64}
+    withdrawMin::Maybe{Float64}
     minAccuracy::Int64
-    chainDeposit::ChainStatus.T
-    chainWithdraw::ChainStatus.T
-    withdrawPercentageFee::Float64
-    contractAddress::String
-    safeConfirmNumber::Int64
+    chainDeposit::Maybe{ChainStatus.T}
+    chainWithdraw::Maybe{ChainStatus.T}
+    withdrawPercentageFee::Maybe{Float64}
+    contractAddress::Maybe{String}
+    safeConfirmNumber::Maybe{Int64}
 end
 
 struct CoinInfo <: BybitData
-    name::String
+    name::Maybe{String}
     coin::String
-    remainAmount::Float64
+    remainAmount::Maybe{Float64}
     chains::Vector{Chain}
 end
 
@@ -59,6 +59,8 @@ end
 function Serde.deser(::Type{Chain}, ::Type{ChainStatus.T}, x::Int64)
     return ChainStatus.T(x)
 end
+
+Serde.isempty(::Type{Chain}, x::AbstractString) = isempty(x)
 
 """
     query_info(client::BybitClient, query::QueryInfoQuery)

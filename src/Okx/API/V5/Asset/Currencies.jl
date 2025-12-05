@@ -23,7 +23,7 @@ struct CurrenciesData <: OkxData
     canInternal::Bool
     canWd::Bool
     ccy::String
-    chain::String
+    chain::Maybe{String}
     depQuotaFixed::Maybe{Float64}
     depQuoteDailyLayer2::Maybe{Int64}
     logoLink::Maybe{String}

@@ -100,3 +100,7 @@ Gateio.API.V4.Wallet.deposits(
     from = now(UTC) - Day(30),
     to = now(UTC)
 )
+
+Gateio.API.V4.Wallet.currency_chains(;
+    currency = "BTC"
+)
